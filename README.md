@@ -25,9 +25,9 @@ iCloud-Sync works around this by talking directly to iCloud's API (via [pyicloud
 
 ## Requirements
 
-- macOS 13+
-- Python 3.11+
-- [pyicloud](https://github.com/timlaing/pyicloud) — cloned locally at `~/Projects/pyicloud` (use the local fork, not the PyPI version)
+**To run the app:** macOS 13+. No Python installation required — the `.app` bundle includes its own.
+
+**To build from source:** macOS 13+, Python 3.11+, Xcode command-line tools.
 
 ## Installation
 
@@ -125,7 +125,7 @@ icloud-sync/
 - iCloud Drive has no push API — remote changes are detected by polling (default: every 60 seconds)
 - Only top-level iCloud Drive folders can be selected as sync targets
 - Does not sync shared folders or iCloud shared albums
-- Requires Python and pyicloud to be installed; not a standalone binary
+- The `.app` bundle is macOS-only and must be built on macOS (no cross-compilation)
 
 ## License
 
