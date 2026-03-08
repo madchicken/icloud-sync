@@ -55,9 +55,10 @@ jobs:
             -fs HFS+ -fsargs "-c c=64,a=16,b=16" \
             -format UDRW -size 600m "$TMP_DMG"
 
-          # Mount it and add the /Applications symlink inside the DMG
-          MOUNT=$(hdiutil attach -readwrite -noverify -noautoopen "$TMP_DMG" \
-            | grep "/Volumes/" | awk 'END{print $NF}')
+          # Mount it at a known path and add the /Applications symlink inside
+          MOUNT="$TMPDIR_DMG/mount"
+          mkdir -p "$MOUNT"
+          hdiutil attach -readwrite -noverify -noautoopen "$TMP_DMG" -mountpoint "$MOUNT"
           ln -s /Applications "$MOUNT/Applications"
           hdiutil detach "$MOUNT"
 
