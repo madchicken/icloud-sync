@@ -227,6 +227,7 @@ class ICloudSyncTray(rumps.App):
         self._settings_item = rumps.MenuItem("Settings…", callback=self._open_settings)
         self._setup_item = rumps.MenuItem("Setup / Credentials…", callback=self._open_setup)
         self._log_item = rumps.MenuItem("Open Log", callback=self._open_log)
+        self._uninstall_item = rumps.MenuItem("Uninstall…", callback=self._uninstall)
         self._quit_item = rumps.MenuItem("Quit", callback=self._quit)
 
         self.menu = [
@@ -241,6 +242,7 @@ class ICloudSyncTray(rumps.App):
             self._setup_item,
             self._log_item,
             None,
+            self._uninstall_item,
             self._quit_item,
         ]
 
@@ -670,6 +672,72 @@ class ICloudSyncTray(rumps.App):
                 "No log file found yet.\nStart the daemon first.",
                 ok_label="OK",
             )
+
+    def _uninstall(self, _sender):
+        if not _confirm(
+            "This will remove iCloud Sync from your Mac:\n\n"
+            "• Stop the sync daemon\n"
+            "• Remove the login item\n"
+            "• Delete config, preferences and log files\n"
+            "• Remove saved credentials from the Keychain\n"
+            "• Move the app to the Trash\n\n"
+            "Your synced files will NOT be deleted.",
+            ok_label="Uninstall",
+            title="Uninstall iCloud Sync",
+        ):
+            return
+
+        # 1 — Stop daemon
+        if self._is_running():
+            self._stop_daemon()
+
+        # 2 — Remove & unload LaunchAgent
+        if _LAUNCH_AGENT_PLIST.exists():
+            subprocess.run(
+                ["launchctl", "unload", str(_LAUNCH_AGENT_PLIST)],
+                capture_output=True,
+            )
+            try:
+                _LAUNCH_AGENT_PLIST.unlink()
+            except FileNotFoundError:
+                pass
+
+        # 3 — Remove credentials from Keychain
+        saved = load_saved_config() or {}
+        username = saved.get("username")
+        if username:
+            try:
+                from .auth import delete_password
+                delete_password(username)
+            except Exception:
+                pass
+
+        # 4 — Delete config directory and log
+        import shutil as _shutil
+        config_dir = Path.home() / ".config" / "icloud_sync"
+        if config_dir.exists():
+            _shutil.rmtree(config_dir, ignore_errors=True)
+
+        log_file = Path.home() / "Library" / "Logs" / "icloud_sync.log"
+        try:
+            log_file.unlink()
+        except FileNotFoundError:
+            pass
+
+        # 5 — Move the .app bundle to the Trash
+        try:
+            from AppKit import NSBundle
+            bundle_path = NSBundle.mainBundle().bundlePath()
+            if bundle_path and bundle_path.endswith(".app"):
+                subprocess.run(
+                    ["osascript", "-e",
+                     f'tell application "Finder" to delete POSIX file "{bundle_path}"'],
+                    capture_output=True,
+                )
+        except Exception:
+            pass
+
+        rumps.quit_application()
 
     def _quit(self, _sender):
         if self._is_running():
