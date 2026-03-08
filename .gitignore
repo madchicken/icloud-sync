@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+*.icns
+AppIcon.iconset/
+
+# App bundle output
+dist/
+
+# Credentials / session cache
+*.plist
+!com.icloud.sync.plist
+~/.icloud_sync_2fa_code
+
+# Logs
+*.log
+
+# Claude Code
+.claude/
+
+# Editor
+.idea/
+.vscode/
+*.swp

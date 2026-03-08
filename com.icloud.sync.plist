@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.icloud.sync</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <!-- Update these paths after installation -->
+        <string>/Users/YOUR_USER/Projects/virtualicloud/.venv/bin/python</string>
+        <string>-m</string>
+        <string>icloud_sync.sync_daemon</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/YOUR_USER/Projects/virtualicloud</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>ICLOUD_USERNAME</key>
+        <string>you@icloud.com</string>
+        <key>ICLOUD_LOCAL_DIR</key>
+        <string>/Users/YOUR_USER/Documents/iCloudSync</string>
+        <key>ICLOUD_REMOTE_DIR</key>
+        <string>SyncFolder</string>
+        <key>ICLOUD_POLL_INTERVAL</key>
+        <string>60</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/icloud_sync.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/icloud_sync.err</string>
+</dict>
+</plist>
