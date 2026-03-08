@@ -19,11 +19,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      # make_icon.py uses PyObjC (pulled in by rumps) to render the cloud icon.
-      # Install rumps first so AppKit bindings are available for the script.
-      - name: Install icon dependencies
-        run: pip install rumps pyobjc-framework-Cocoa
-
+      # make_icon.py uses only macOS built-ins (sips, iconutil) — no pip deps needed.
       - name: Generate icons
         run: python3 scripts/make_icon.py
 
