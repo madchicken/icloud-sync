@@ -51,12 +51,13 @@ jobs:
       - name: Create app
         run: briefcase create macOS app
 
-      # Install rumps from source into the Briefcase Python environment.
-      - name: Install rumps into Briefcase environment
+      # Briefcase uses app_packages/ for installed deps (no traditional Python binary).
+      # Install rumps from source directly into the Briefcase app_packages directory.
+      - name: Install rumps into Briefcase app_packages
         run: |
-          BFPY=$(find build -name "python3" | head -1)
-          echo "Briefcase Python: $BFPY"
-          "$BFPY" -m pip install rumps
+          TARGET=$(find build -type d -name "app_packages" | head -1)
+          echo "app_packages: $TARGET"
+          pip install --target "$TARGET" rumps
 
       - name: Build app
         run: briefcase build macOS app
