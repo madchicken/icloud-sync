@@ -28,14 +28,39 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION"
 
-      # make_icon.py uses only macOS built-ins (sips, iconutil) — no pip deps needed.
       - name: Generate icons
         run: python3 scripts/make_icon.py
 
-      # build_app.sh creates its own venv inside the bundle and pip-installs
-      # the full package (including pyicloud from GitHub) into it.
-      - name: Build .app bundle
-        run: bash scripts/build_app.sh
+      - name: Build wheel
+        run: |
+          pip install build
+          python3 -m build --wheel --outdir dist/
+
+      # Compile a universal launcher binary (arm64 + x86_64) with no baked-in
+      # paths — it discovers the bundled venv at runtime via _NSGetExecutablePath.
+      # The install script on the user's machine copies this into the .app bundle.
+      - name: Compile launcher
+        run: |
+          cc -arch arm64 -arch x86_64 -Wall -o dist/launcher scripts/launcher.c
+          codesign --force --sign - dist/launcher
+
+      - name: Assemble installer package
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          PKG="dist/pkg"
+          mkdir -p "$PKG"
+
+          # Payload
+          cp dist/virtualicloud-*.whl  "$PKG/"
+          cp dist/launcher             "$PKG/"
+          cp AppIcon.icns              "$PKG/"
+          cp assets/menubarTemplate.png      "$PKG/"
+          cp assets/menubarTemplate@2x.png   "$PKG/"
+          echo "$VERSION"           > "$PKG/version.txt"
+
+          # Install script
+          cp scripts/install.command "$PKG/Install iCloud Sync.command"
+          chmod +x "$PKG/Install iCloud Sync.command"
 
       - name: Create DMG
         id: dmg
@@ -43,26 +68,17 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           DMG="dist/iCloud-Sync-${VERSION}.dmg"
           TMPDIR_DMG="$(mktemp -d)"
-          STAGING="$TMPDIR_DMG/staging"
           TMP_DMG="$TMPDIR_DMG/rw.dmg"
-
-          # Copy app into a staging folder
-          mkdir -p "$STAGING"
-          cp -r "dist/iCloud Sync.app" "$STAGING/"
-
-          # Create a writable DMG from the staging folder
-          hdiutil create -srcfolder "$STAGING" -volname "iCloud Sync $VERSION" \
-            -fs HFS+ -fsargs "-c c=64,a=16,b=16" \
-            -format UDRW -size 600m "$TMP_DMG"
-
-          # Mount it at a known path and add the /Applications symlink inside
           MOUNT="$TMPDIR_DMG/mount"
+
           mkdir -p "$MOUNT"
-          hdiutil attach -readwrite -noverify -noautoopen "$TMP_DMG" -mountpoint "$MOUNT"
-          ln -s /Applications "$MOUNT/Applications"
+          hdiutil create -srcfolder dist/pkg \
+            -volname "iCloud Sync $VERSION" \
+            -fs HFS+ -format UDRW -size 300m "$TMP_DMG"
+          hdiutil attach -readwrite -noverify -noautoopen "$TMP_DMG" \
+            -mountpoint "$MOUNT"
           hdiutil detach "$MOUNT"
 
-          # Convert to compressed read-only DMG
           hdiutil convert "$TMP_DMG" -format UDZO -imagekey zlib-level=9 -o "$DMG"
           rm -rf "$TMPDIR_DMG"
 
