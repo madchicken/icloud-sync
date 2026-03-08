@@ -64,7 +64,7 @@ cp -r "dist/iCloud Sync.app" /Applications/
 Because the app is unsigned, macOS quarantines it when downloaded. Remove the quarantine flag after copying:
 
 ```bash
-xattr -cr "/Applications/iCloud Sync.app"
+xattr -rd com.apple.quarantine "/Applications/iCloud Sync.app"
 ```
 
 Or right-click the app → **Open** → **Open** in the dialog (one-time only).
