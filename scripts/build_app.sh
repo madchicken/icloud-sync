@@ -82,28 +82,14 @@ cp "$ROOT/assets/menubarTemplate@2x.png"     "$RESOURCES/menubarTemplate@2x.png"
 /usr/libexec/PlistBuddy -c "Add :NSUserNotificationAlertStyle string 'alert'"       "$CONTENTS/Info.plist"
 
 # ── Ad-hoc code sign ─────────────────────────────────────────────────────────
-# Signing strategy for a venv-bundled app:
-#   1. Sign every Mach-O binary in the venv (.so/.dylib + ELF executables).
-#      Must be done before sealing the outer bundle.
-#   2. Sign the launcher binary explicitly.
-#   3. Sign the bundle WITHOUT --deep: --deep re-signs nested code in
-#      an unpredictable order and corrupts the seal we built in step 1.
-echo "▸ Signing venv Mach-O binaries…"
-find "$RESOURCES/venv" \( -name "*.so" -o -name "*.dylib" \) \
-    -exec codesign --force --sign - {} \;
-
-# Sign any Mach-O executables in venv/bin (Python interpreter etc.)
-while IFS= read -r f; do
-    if file "$f" | grep -q "Mach-O"; then
-        codesign --force --sign - "$f"
-    fi
-done < <(find "$RESOURCES/venv/bin" -type f)
-
-echo "▸ Signing launcher…"
+# Only sign the launcher binary. Sealing the entire bundle with codesign
+# produces a broken seal because the bundled venv contains hundreds of
+# Python scripts and data files that confuse the resource-rules hashing.
+# A broken seal causes macOS to report the app as "damaged".
+# The quarantine flag (added when downloading from the internet) is removed
+# at install time with: xattr -cr "/Applications/iCloud Sync.app"
+echo "▸ Signing launcher binary…"
 codesign --force --sign - "$MACOS/$APP_NAME"
-
-echo "▸ Sealing app bundle…"
-codesign --force --sign - "$APP"
 
 echo "✓ Built: $APP"
 echo ""
