@@ -1,5 +1,9 @@
 # iCloud-Sync
 
+<p align="center">
+  <img src="iCloud-sync-icon.png" width="128" alt="iCloud-Sync icon" />
+</p>
+
 A lightweight macOS menu bar app and background daemon that keeps local folders in sync with iCloud Drive — built for people who **cannot use Apple's native iCloud Drive integration**.
 
 ## Why this exists
