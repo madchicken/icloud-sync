@@ -1,0 +1,61 @@
+name: Build DMG
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # make_icon.py uses PyObjC (pulled in by rumps) to render the cloud icon.
+      # Install rumps first so AppKit bindings are available for the script.
+      - name: Install icon dependencies
+        run: pip install rumps pyobjc-framework-Cocoa
+
+      - name: Generate icons
+        run: python3 scripts/make_icon.py
+
+      # build_app.sh creates its own venv inside the bundle and pip-installs
+      # the full package (including pyicloud from GitHub) into it.
+      - name: Build .app bundle
+        run: bash scripts/build_app.sh
+
+      - name: Create DMG
+        run: |
+          # Stage: app + shortcut to /Applications for drag-install UX
+          mkdir -p dist/dmg_stage
+          cp -r "dist/iCloud Sync.app" dist/dmg_stage/
+          ln -s /Applications dist/dmg_stage/Applications
+
+          hdiutil create \
+            -volname "iCloud Sync" \
+            -srcfolder dist/dmg_stage \
+            -ov -format UDZO \
+            "dist/iCloud-Sync.dmg"
+
+          rm -rf dist/dmg_stage
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iCloud-Sync-dmg
+          path: dist/iCloud-Sync.dmg
+          retention-days: 30
+
+      - name: Attach DMG to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/iCloud-Sync.dmg

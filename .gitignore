@@ -12,7 +12,6 @@ env/
 
 # macOS
 .DS_Store
-*.icns
 AppIcon.iconset/
 
 # App bundle output
