@@ -37,6 +37,14 @@ jobs:
       - name: Create app
         run: briefcase create macOS app
 
+      # rumps has no wheel on PyPI so Briefcase (--only-binary) can't install it.
+      # Install it from source directly into the Briefcase Python after creation.
+      - name: Install rumps into Briefcase environment
+        run: |
+          BFPY=$(find "macOS/app" -name "python3" -path "*/bin/python3" | head -1)
+          echo "Briefcase Python: $BFPY"
+          "$BFPY" -m pip install rumps
+
       - name: Build app
         run: briefcase build macOS app
 

@@ -36,7 +36,7 @@ requires = [
     "pyicloud @ git+https://github.com/timlaing/pyicloud.git",
     "watchdog>=4.0",
     "keyring>=25.0",
-    "rumps>=0.4",
+    # rumps is source-only on PyPI (no wheel); installed separately after briefcase create
 ]
 
 [tool.briefcase.app.icloud_sync.macOS]
