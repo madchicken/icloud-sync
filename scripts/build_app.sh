@@ -82,8 +82,13 @@ cp "$ROOT/assets/menubarTemplate@2x.png"     "$RESOURCES/menubarTemplate@2x.png"
 /usr/libexec/PlistBuddy -c "Add :NSUserNotificationAlertStyle string 'alert'"       "$CONTENTS/Info.plist"
 
 # ── Ad-hoc code sign ─────────────────────────────────────────────────────────
-# Required on macOS 10.15+ for Finder-launched unsigned apps.
-echo "▸ Signing…"
+# codesign --deep doesn't reliably recurse into a bundled venv, so sign all
+# nested Mach-O binaries (.so/.dylib + executables) first, then seal the bundle.
+echo "▸ Signing venv binaries…"
+find "$RESOURCES/venv" \( -name "*.so" -o -name "*.dylib" \) \
+    -exec codesign --force --sign - {} \;
+
+echo "▸ Signing app bundle…"
 codesign --force --deep --sign - "$APP"
 
 echo "✓ Built: $APP"
