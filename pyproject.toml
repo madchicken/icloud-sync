@@ -15,3 +15,30 @@ include = ["icloud_sync*"]
 [project.scripts]
 icloud-sync = "icloud_sync.cli:main"
 icloud-sync-tray = "icloud_sync.tray_app:main"
+
+# ---------------------------------------------------------------------------
+# Briefcase — standalone .app / DMG packaging
+# ---------------------------------------------------------------------------
+[tool.briefcase]
+project_name = "iCloud Sync"
+bundle = "com.icloud-sync"
+version = "0.1.0"
+url = "https://github.com/madchicken/icloud-sync"
+author = "madchicken"
+
+[tool.briefcase.app.tray]
+formal_name = "iCloud Sync"
+description = "iCloud Drive sync for MDM-restricted Macs"
+icon = "iCloud-sync-icon"
+sources = ["icloud_sync"]
+requires = [
+    "pyicloud @ git+https://github.com/timlaing/pyicloud.git",
+    "watchdog>=4.0",
+    "keyring>=25.0",
+    "rumps>=0.4",
+]
+
+[tool.briefcase.app.tray.macOS]
+# LSUIElement suppresses the Dock icon — menu bar only app
+info."LSUIElement" = true
+info."NSUserNotificationAlertStyle" = "alert"

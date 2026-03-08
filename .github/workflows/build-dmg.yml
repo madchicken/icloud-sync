@@ -31,58 +31,24 @@ jobs:
       - name: Generate icons
         run: python3 scripts/make_icon.py
 
-      - name: Build wheel
-        run: |
-          pip install build
-          python3 -m build --wheel --outdir dist/
+      - name: Install Briefcase
+        run: pip install briefcase
 
-      # Compile a universal launcher binary (arm64 + x86_64) with no baked-in
-      # paths — it discovers the bundled venv at runtime via _NSGetExecutablePath.
-      # The install script on the user's machine copies this into the .app bundle.
-      - name: Compile launcher
-        run: |
-          cc -arch arm64 -arch x86_64 -Wall -o dist/launcher scripts/launcher.c
-          codesign --force --sign - dist/launcher
+      - name: Create app
+        run: briefcase create macOS app
 
-      - name: Assemble installer package
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          PKG="dist/pkg"
-          mkdir -p "$PKG"
+      - name: Build app
+        run: briefcase build macOS app
 
-          # Payload
-          cp dist/virtualicloud-*.whl  "$PKG/"
-          cp dist/launcher             "$PKG/"
-          cp AppIcon.icns              "$PKG/"
-          cp assets/menubarTemplate.png      "$PKG/"
-          cp assets/menubarTemplate@2x.png   "$PKG/"
-          echo "$VERSION"           > "$PKG/version.txt"
+      - name: Package DMG
+        run: briefcase package macOS app --adhoc-sign
 
-          # Install script
-          cp scripts/install.command "$PKG/Install iCloud Sync.command"
-          chmod +x "$PKG/Install iCloud Sync.command"
-
-      - name: Create DMG
+      - name: Locate DMG
         id: dmg
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          DMG="dist/iCloud-Sync-${VERSION}.dmg"
-          TMPDIR_DMG="$(mktemp -d)"
-          TMP_DMG="$TMPDIR_DMG/rw.dmg"
-          MOUNT="$TMPDIR_DMG/mount"
-
-          mkdir -p "$MOUNT"
-          hdiutil create -srcfolder dist/pkg \
-            -volname "iCloud Sync $VERSION" \
-            -fs HFS+ -format UDRW -size 300m "$TMP_DMG"
-          hdiutil attach -readwrite -noverify -noautoopen "$TMP_DMG" \
-            -mountpoint "$MOUNT"
-          hdiutil detach "$MOUNT"
-
-          hdiutil convert "$TMP_DMG" -format UDZO -imagekey zlib-level=9 -o "$DMG"
-          rm -rf "$TMPDIR_DMG"
-
+          DMG=$(find dist -name "*.dmg" | head -1)
           echo "dmg=$DMG" >> "$GITHUB_OUTPUT"
+          echo "DMG: $DMG"
 
       - name: Upload DMG artifact
         uses: actions/upload-artifact@v4
