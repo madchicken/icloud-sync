@@ -19,6 +19,13 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
       # make_icon.py uses only macOS built-ins (sips, iconutil) — no pip deps needed.
       - name: Generate icons
         run: python3 scripts/make_icon.py
@@ -30,28 +37,33 @@ jobs:
 
       - name: Create DMG
         run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          DMG="dist/iCloud-Sync-${VERSION}.dmg"
+
           # Stage: app + shortcut to /Applications for drag-install UX
           mkdir -p dist/dmg_stage
           cp -r "dist/iCloud Sync.app" dist/dmg_stage/
           ln -s /Applications dist/dmg_stage/Applications
 
           hdiutil create \
-            -volname "iCloud Sync" \
+            -volname "iCloud Sync ${VERSION}" \
             -srcfolder dist/dmg_stage \
             -ov -format UDZO \
-            "dist/iCloud-Sync.dmg"
+            "$DMG"
 
           rm -rf dist/dmg_stage
+          echo "dmg=$DMG" >> "$GITHUB_OUTPUT"
+        id: dmg
 
       - name: Upload DMG artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iCloud-Sync-dmg
-          path: dist/iCloud-Sync.dmg
+          name: iCloud-Sync-${{ steps.version.outputs.version }}
+          path: ${{ steps.dmg.outputs.dmg }}
           retention-days: 30
 
       - name: Attach DMG to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/iCloud-Sync.dmg
+          files: ${{ steps.dmg.outputs.dmg }}

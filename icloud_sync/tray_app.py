@@ -478,6 +478,14 @@ class ICloudSyncTray(rumps.App):
     # Utilities
     # -------------------------------------------------------------------------
 
+    @staticmethod
+    def _app_version() -> str:
+        try:
+            from importlib.metadata import version
+            return version("virtualicloud")
+        except Exception:
+            return "unknown"
+
     def _open_settings(self, _sender):
         from AppKit import NSAlert, NSApp, NSButton, NSMakeRect, NSTextField, NSView
 
@@ -525,6 +533,7 @@ class ICloudSyncTray(rumps.App):
         # ── Alert ────────────────────────────────────────────────────────────
         alert = NSAlert.alloc().init()
         alert.setMessageText_("iCloud Sync Settings")
+        alert.setInformativeText_(f"Version {self._app_version()}")
         alert.addButtonWithTitle_("Save")
         alert.addButtonWithTitle_("Cancel")
         alert.setAccessoryView_(view)
