@@ -51,13 +51,10 @@ jobs:
       - name: Create app
         run: briefcase create macOS app
 
-      - name: Debug Briefcase output structure
-        run: ls -la && find . -maxdepth 4 -name "python3" 2>/dev/null | head -20
-
       # Install rumps from source into the Briefcase Python environment.
       - name: Install rumps into Briefcase environment
         run: |
-          BFPY=$(find . -name "python3" -path "*/support/python*/bin/python3" | head -1)
+          BFPY=$(find build -name "python3" | head -1)
           echo "Briefcase Python: $BFPY"
           "$BFPY" -m pip install rumps
 
