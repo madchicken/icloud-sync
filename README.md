@@ -1,116 +1,84 @@
-# virtualicloud
+# iCloud-Sync
 
-A lightweight background daemon that keeps a local folder in sync with an iCloud Drive folder on macOS, built on [pyicloud](https://github.com/timlaing/pyicloud).
+A lightweight macOS menu bar app and background daemon that keeps local folders in sync with iCloud Drive — built for people who **cannot use Apple's native iCloud Drive integration**.
+
+## Why this exists
+
+If your Mac is enrolled in a corporate Mobile Device Management (MDM) profile, your company may restrict or completely block the native iCloud Drive client. This is common in enterprise environments where IT policies prevent personal cloud storage from running as a system service.
+
+iCloud-Sync works around this by talking directly to iCloud's API (via [pyicloud](https://github.com/timlaing/pyicloud)) from user space — no system extensions, no privileged daemons, no interaction with the macOS iCloud subsystem that MDM profiles lock down. It runs entirely as an unprivileged background process and communicates with iCloud over HTTPS, the same way a web browser would.
+
+## Features
+
+- **Menu bar app** — start/stop the daemon, manage sync pairs, and configure settings from the macOS status bar
+- **Multi-folder sync** — sync as many iCloud Drive ↔ local folder pairs as you need
+- **Native dialogs** — setup, authentication, and 2FA all use standard macOS system dialogs (no terminal required)
+- **Automatic reload** — adding or removing a sync pair takes effect immediately without restarting the daemon
+- **Start at login** — optional LaunchAgent installs automatically from the Settings dialog
+- **Conflict handling** — last-write-wins; the losing version is preserved as `.conflict-TIMESTAMP.ext`
 
 ## How it works
 
 - **Local changes** are detected instantly via `watchdog` (filesystem events)
 - **Remote changes** are detected by polling iCloud Drive every 60 seconds (iCloud has no push API)
-- **Conflicts** are resolved by last-write-wins; the losing version is saved as `.conflict-TIMESTAMP.ext`
+- **Session** is kept alive with periodic refresh; Apple sessions last ~2 months
 
 ## Requirements
 
-- macOS
+- macOS 13+
 - Python 3.11+
-- [pyicloud](https://github.com/timlaing/pyicloud) cloned locally at `~/Projects/pyicloud`
+- [pyicloud](https://github.com/timlaing/pyicloud) — cloned locally at `~/Projects/pyicloud` (use the local fork, not the PyPI version)
 
-## Setup
+## Installation
 
-### 1. Install dependencies
+### 1. Clone and install
 
 ```bash
-cd ~/Projects/virtualicloud
+git clone https://github.com/madchicken/icloud-sync.git
+cd icloud-sync
 python -m venv .venv
 .venv/bin/pip install -e .
 ```
 
-### 2. Store credentials in macOS Keychain
+### 2. Build the .app bundle
 
-Run the built-in setup command. It will prompt for your password, verify the login (including 2FA if enabled), and store credentials in the macOS Keychain:
-
-```bash
-.venv/bin/icloud-sync setup --username you@icloud.com
-```
-
-To verify credentials are stored:
+Generate the icon and build the app:
 
 ```bash
-.venv/bin/icloud-sync status --username you@icloud.com
+.venv/bin/python scripts/make_icon.py
+bash scripts/build_app.sh
 ```
 
-To remove stored credentials:
+This produces `dist/iCloud Sync.app`.
+
+### 3. Install the app
 
 ```bash
-.venv/bin/icloud-sync setup --username you@icloud.com --delete
+cp -r "dist/iCloud Sync.app" /Applications/
 ```
 
-### 3. Test run
+On first launch, right-click the app → **Open** to approve it (required for unsigned apps). Alternatively:
 
 ```bash
-ICLOUD_USERNAME=you@icloud.com \
-ICLOUD_LOCAL_DIR=~/Documents/iCloudSync \
-ICLOUD_REMOTE_DIR=SyncFolder \
-.venv/bin/icloud-sync start
+sudo spctl --add "/Applications/iCloud Sync.app"
 ```
 
-The daemon will:
-1. Create `~/Documents/iCloudSync` locally if it doesn't exist
-2. Create `SyncFolder` in iCloud Drive if it doesn't exist
-3. Perform an initial full sync
-4. Watch for local changes and poll for remote changes every 60 seconds
+### 4. Sign in
 
-Logs are written to `~/Library/Logs/icloud_sync.log` and to stdout.
+Click the cloud icon in the menu bar → **Setup / Credentials…**
 
-### 4. Install as a launchd agent (runs at login, auto-restarts)
+The setup wizard will ask for your Apple ID, password, and 2FA code using native macOS dialogs. Credentials are stored securely in the macOS Keychain.
 
-Edit `com.icloud.sync.plist` — replace `YOUR_USER` and the paths with your actual values:
+## Menu bar usage
 
-```xml
-<string>/Users/YOUR_USER/Projects/virtualicloud/.venv/bin/icloud-sync</string>
-<string>start</string>
-...
-<key>ICLOUD_USERNAME</key>
-<string>you@icloud.com</string>
-<key>ICLOUD_LOCAL_DIR</key>
-<string>/Users/YOUR_USER/Documents/iCloudSync</string>
-```
-
-Then install it:
-
-```bash
-cp com.icloud.sync.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.icloud.sync.plist
-```
-
-To stop and uninstall:
-
-```bash
-launchctl unload ~/Library/LaunchAgents/com.icloud.sync.plist
-rm ~/Library/LaunchAgents/com.icloud.sync.plist
-```
-
-## Configuration
-
-All configuration is via environment variables:
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `ICLOUD_USERNAME` | yes | — | Apple ID email |
-| `ICLOUD_LOCAL_DIR` | yes | — | Local folder to sync |
-| `ICLOUD_REMOTE_DIR` | no | `SyncFolder` | iCloud Drive folder name |
-| `ICLOUD_POLL_INTERVAL` | no | `60` | Seconds between remote polls |
-
-## Two-factor authentication
-
-During `icloud-sync setup`, 2FA is handled interactively in the terminal.
-
-When the daemon is running and the session expires (Apple sessions last ~2 months), re-authentication is needed. The daemon will send a macOS notification and wait for you to supply the code:
-
-```bash
-echo 123456 > ~/.icloud_sync_2fa_code
-```
-
-To avoid this, re-run `icloud-sync setup` before the session expires, which refreshes the stored credentials.
+| Menu item | Description |
+|---|---|
+| **Start / Stop** | Start or stop the sync daemon |
+| **Sync Pairs** | See all configured sync pairs |
+| **Pairings…** | Add or remove iCloud ↔ local folder pairs |
+| **Settings…** | Start at login, auto-start daemon, polling interval |
+| **Setup / Credentials…** | Sign in or update your Apple ID credentials |
+| **Open Log** | Open the sync log in Console |
 
 ## Sync behaviour
 
@@ -124,21 +92,41 @@ To avoid this, re-run `icloud-sync setup` before the session expires, which refr
 | Deleted on remote | Delete local |
 | Deleted on local | Delete remote |
 
-### Excluded files
+Files never synced: `.DS_Store`, `*.tmp`, `*.part`, hidden files (`.`-prefixed), `desktop.ini`, `Thumbs.db`.
 
-The following are never synced: `.DS_Store`, `*.tmp`, `*.part`, hidden files (`.`-prefixed), `desktop.ini`, `Thumbs.db`.
+## Two-factor authentication
+
+During initial setup, 2FA is handled via a native dialog — just enter the code that appears on your trusted Apple device.
+
+When the session expires (~2 months), re-run **Setup / Credentials…** from the menu bar to refresh it.
 
 ## Project structure
 
 ```
-virtualicloud/
+icloud-sync/
 ├── icloud_sync/
-│   ├── cli.py          — icloud-sync entry point (setup / status / start)
+│   ├── tray_app.py     — menu bar app (rumps)
+│   ├── cli.py          — icloud-sync CLI entry point
 │   ├── auth.py         — keychain helpers, authentication, 2FA handling
-│   ├── config.py       — configuration dataclass
+│   ├── config.py       — config, sync pairs, PID file, preferences
 │   ├── state.py        — sync state persistence (JSON)
-│   ├── engine.py       — reconciliation logic, remote/local walk
+│   ├── engine.py       — reconciliation logic
 │   ├── watcher.py      — local filesystem watcher (watchdog)
 │   └── sync_daemon.py  — daemon main loop
-└── com.icloud.sync.plist  — launchd agent template
+├── scripts/
+│   ├── make_icon.py    — generates AppIcon.icns and menu bar template image
+│   ├── build_app.sh    — assembles and signs the .app bundle
+│   └── launcher.c      — C binary launcher (required by Gatekeeper)
+└── com.icloud.sync.plist  — launchd agent template (manual install)
 ```
+
+## Limitations
+
+- iCloud Drive has no push API — remote changes are detected by polling (default: every 60 seconds)
+- Only top-level iCloud Drive folders can be selected as sync targets
+- Does not sync shared folders or iCloud shared albums
+- Requires Python and pyicloud to be installed; not a standalone binary
+
+## License
+
+MIT
