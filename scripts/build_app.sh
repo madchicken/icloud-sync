@@ -82,19 +82,33 @@ cp "$ROOT/assets/menubarTemplate@2x.png"     "$RESOURCES/menubarTemplate@2x.png"
 /usr/libexec/PlistBuddy -c "Add :NSUserNotificationAlertStyle string 'alert'"       "$CONTENTS/Info.plist"
 
 # ── Ad-hoc code sign ─────────────────────────────────────────────────────────
-# codesign --deep doesn't reliably recurse into a bundled venv, so sign all
-# nested Mach-O binaries (.so/.dylib + executables) first, then seal the bundle.
-echo "▸ Signing venv binaries…"
+# Signing strategy for a venv-bundled app:
+#   1. Sign every Mach-O binary in the venv (.so/.dylib + ELF executables).
+#      Must be done before sealing the outer bundle.
+#   2. Sign the launcher binary explicitly.
+#   3. Sign the bundle WITHOUT --deep: --deep re-signs nested code in
+#      an unpredictable order and corrupts the seal we built in step 1.
+echo "▸ Signing venv Mach-O binaries…"
 find "$RESOURCES/venv" \( -name "*.so" -o -name "*.dylib" \) \
     -exec codesign --force --sign - {} \;
 
-echo "▸ Signing app bundle…"
-codesign --force --deep --sign - "$APP"
+# Sign any Mach-O executables in venv/bin (Python interpreter etc.)
+while IFS= read -r f; do
+    if file "$f" | grep -q "Mach-O"; then
+        codesign --force --sign - "$f"
+    fi
+done < <(find "$RESOURCES/venv/bin" -type f)
+
+echo "▸ Signing launcher…"
+codesign --force --sign - "$MACOS/$APP_NAME"
+
+echo "▸ Sealing app bundle…"
+codesign --force --sign - "$APP"
 
 echo "✓ Built: $APP"
 echo ""
 echo "To install:"
 echo "  1. cp -r \"$APP\" /Applications/"
-echo "  2. sudo spctl --add \"/Applications/$APP_NAME.app\"   # allow in Gatekeeper"
+echo "  2. xattr -cr \"/Applications/$APP_NAME.app\"   # remove quarantine flag"
 echo ""
 echo "Or right-click → Open in Finder to approve it interactively."

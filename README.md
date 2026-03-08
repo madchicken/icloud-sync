@@ -61,11 +61,13 @@ This produces `dist/iCloud Sync.app`.
 cp -r "dist/iCloud Sync.app" /Applications/
 ```
 
-On first launch, right-click the app → **Open** to approve it (required for unsigned apps). Alternatively:
+Because the app is unsigned, macOS quarantines it when downloaded. Remove the quarantine flag after copying:
 
 ```bash
-sudo spctl --add "/Applications/iCloud Sync.app"
+xattr -cr "/Applications/iCloud Sync.app"
 ```
+
+Or right-click the app → **Open** → **Open** in the dialog (one-time only).
 
 ### 4. Sign in
 
