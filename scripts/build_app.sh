@@ -57,10 +57,16 @@ if [ ! -f "$TRAY_SCRIPT" ]; then
 fi
 
 # ── Launcher binary ───────────────────────────────────────────────────────────
-# A real Mach-O binary is required — Gatekeeper rejects shell scripts in
-# unsigned .app bundles. The launcher discovers the bundled venv at runtime.
+# Compile and sign the launcher OUTSIDE the bundle, then move it in.
+# Signing a binary that's already inside a .app causes codesign to seal the
+# entire bundle (including the venv), which breaks verification later.
 echo "▸ Compiling launcher binary…"
-cc -Wall -o "$MACOS/$APP_NAME" "$SCRIPT_DIR/launcher.c"
+TMP_LAUNCHER="$(mktemp)"
+cc -Wall -o "$TMP_LAUNCHER" "$SCRIPT_DIR/launcher.c"
+echo "▸ Signing launcher binary…"
+codesign --force --sign - "$TMP_LAUNCHER"
+mv "$TMP_LAUNCHER" "$MACOS/$APP_NAME"
+chmod +x "$MACOS/$APP_NAME"
 
 # ── Resources ─────────────────────────────────────────────────────────────────
 cp "$ROOT/AppIcon.icns"                      "$RESOURCES/AppIcon.icns"
