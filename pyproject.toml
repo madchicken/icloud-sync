@@ -30,7 +30,7 @@ author = "madchicken"
 [tool.briefcase.app.icloud_sync]
 formal_name = "iCloud Sync"
 description = "iCloud Drive sync for MDM-restricted Macs"
-icon = "iCloud-sync-icon"
+icon = "AppIcon"
 sources = ["icloud_sync"]
 requires = [
     "pyicloud @ git+https://github.com/timlaing/pyicloud.git",
