@@ -9,6 +9,9 @@ dependencies = [
     "rumps>=0.4",
 ]
 
+[tool.setuptools.packages.find]
+include = ["icloud_sync*"]
+
 [project.scripts]
 icloud-sync = "icloud_sync.cli:main"
 icloud-sync-tray = "icloud_sync.tray_app:main"
