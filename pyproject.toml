@@ -24,6 +24,7 @@ project_name = "iCloud Sync"
 bundle = "com.icloud-sync"
 version = "0.1.0"
 url = "https://github.com/madchicken/icloud-sync"
+license.text = "MIT"
 author = "madchicken"
 
 [tool.briefcase.app.tray]
