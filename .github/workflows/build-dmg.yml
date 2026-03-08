@@ -34,11 +34,24 @@ jobs:
       - name: Install Briefcase
         run: pip install briefcase
 
+      # rumps has no wheel on PyPI; Briefcase uses --only-binary :all: which would fail.
+      # Patch pyproject.toml to remove rumps from [project].dependencies before create,
+      # then install it from source into the Briefcase Python after creation.
+      - name: Patch out rumps before briefcase create
+        run: |
+          python3 - <<'EOF'
+          import re, pathlib
+          p = pathlib.Path("pyproject.toml")
+          t = p.read_text()
+          t = re.sub(r'\s*"rumps>=0\.4",?\n', '\n', t)
+          p.write_text(t)
+          print("Patched pyproject.toml — rumps removed from [project].dependencies")
+          EOF
+
       - name: Create app
         run: briefcase create macOS app
 
-      # rumps has no wheel on PyPI so Briefcase (--only-binary) can't install it.
-      # Install it from source directly into the Briefcase Python after creation.
+      # Install rumps from source into the Briefcase Python environment.
       - name: Install rumps into Briefcase environment
         run: |
           BFPY=$(find "macOS/app" -name "python3" -path "*/bin/python3" | head -1)
