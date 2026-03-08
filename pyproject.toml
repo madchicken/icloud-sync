@@ -27,7 +27,7 @@ url = "https://github.com/madchicken/icloud-sync"
 license.text = "MIT"
 author = "madchicken"
 
-[tool.briefcase.app.tray]
+[tool.briefcase.app.icloud_sync]
 formal_name = "iCloud Sync"
 description = "iCloud Drive sync for MDM-restricted Macs"
 icon = "iCloud-sync-icon"
@@ -39,7 +39,7 @@ requires = [
     "rumps>=0.4",
 ]
 
-[tool.briefcase.app.tray.macOS]
+[tool.briefcase.app.icloud_sync.macOS]
 # LSUIElement suppresses the Dock icon — menu bar only app
 info."LSUIElement" = true
 info."NSUserNotificationAlertStyle" = "alert"
