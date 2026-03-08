@@ -38,24 +38,34 @@ jobs:
         run: bash scripts/build_app.sh
 
       - name: Create DMG
+        id: dmg
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           DMG="dist/iCloud-Sync-${VERSION}.dmg"
+          TMPDIR_DMG="$(mktemp -d)"
+          STAGING="$TMPDIR_DMG/staging"
+          TMP_DMG="$TMPDIR_DMG/rw.dmg"
 
-          # Stage: app + shortcut to /Applications for drag-install UX
-          mkdir -p dist/dmg_stage
-          cp -r "dist/iCloud Sync.app" dist/dmg_stage/
-          ln -s /Applications dist/dmg_stage/Applications
+          # Copy app into a staging folder
+          mkdir -p "$STAGING"
+          cp -r "dist/iCloud Sync.app" "$STAGING/"
 
-          hdiutil create \
-            -volname "iCloud Sync ${VERSION}" \
-            -srcfolder dist/dmg_stage \
-            -ov -format UDZO \
-            "$DMG"
+          # Create a writable DMG from the staging folder
+          hdiutil create -srcfolder "$STAGING" -volname "iCloud Sync $VERSION" \
+            -fs HFS+ -fsargs "-c c=64,a=16,b=16" \
+            -format UDRW -size 600m "$TMP_DMG"
 
-          rm -rf dist/dmg_stage
+          # Mount it and add the /Applications symlink inside the DMG
+          MOUNT=$(hdiutil attach -readwrite -noverify -noautoopen "$TMP_DMG" \
+            | grep "/Volumes/" | awk 'END{print $NF}')
+          ln -s /Applications "$MOUNT/Applications"
+          hdiutil detach "$MOUNT"
+
+          # Convert to compressed read-only DMG
+          hdiutil convert "$TMP_DMG" -format UDZO -imagekey zlib-level=9 -o "$DMG"
+          rm -rf "$TMPDIR_DMG"
+
           echo "dmg=$DMG" >> "$GITHUB_OUTPUT"
-        id: dmg
 
       - name: Upload DMG artifact
         uses: actions/upload-artifact@v4
