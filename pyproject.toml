@@ -1,6 +1,6 @@
 [project]
 name = "virtualicloud"
-version = "0.1.0"
+version = "0.1.1"
 requires-python = ">=3.11"
 dependencies = [
     "pyicloud @ git+https://github.com/timlaing/pyicloud.git",
@@ -22,7 +22,7 @@ icloud-sync-tray = "icloud_sync.tray_app:main"
 [tool.briefcase]
 project_name = "iCloud Sync"
 bundle = "com.icloud-sync"
-version = "0.1.0"
+version = "0.1.1"
 url = "https://github.com/madchicken/icloud-sync"
 license.text = "MIT"
 author = "madchicken"
