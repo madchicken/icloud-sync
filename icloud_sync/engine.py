@@ -299,7 +299,10 @@ def conflict_copy(local_base: Path, rel: str) -> None:
         return
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     dest = path.with_name(f"{path.stem}.conflict-{ts}{path.suffix}")
-    shutil.copy2(path, dest)
+    if path.is_dir():
+        shutil.copytree(path, dest)
+    else:
+        shutil.copy2(path, dest)
     logger.info("Conflict copy: %s", dest.name)
 
 
