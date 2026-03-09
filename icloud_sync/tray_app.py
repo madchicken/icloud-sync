@@ -303,6 +303,14 @@ class ICloudSyncTray(rumps.App):
         self._sync_status()
 
     def _start_daemon(self):
+        if not get_pairs():
+            _dialog(
+                "No sync pairs configured.\n\n"
+                "Use Pairings… to add at least one local ↔ iCloud Drive folder pair.",
+                ["OK"],
+                title="iCloud Sync",
+            )
+            return
         cmd = self._daemon_cmd()
         try:
             self._proc = subprocess.Popen(
@@ -622,6 +630,20 @@ class ICloudSyncTray(rumps.App):
         save_config(username, pairs, poll_interval)
 
         _notify("iCloud Sync", f"Setup complete — signed in as {username}")
+
+        # Offer to add a sync pair immediately if none are configured yet
+        if not pairs:
+            clicked = _dialog(
+                f"Signed in as {username}.\n\n"
+                "You have no sync pairs configured yet. "
+                "Would you like to add one now?",
+                ["Later", "Add Pair…"],
+                title="iCloud Setup",
+                default_button="Add Pair…",
+            )
+            if clicked == "Add Pair…":
+                self._do_add_pair()
+                self._sync_pairs()
 
     def _handle_2fa_dialog(self, api) -> bool:
         """Show native 2FA code dialog. Returns True on success."""
