@@ -17,17 +17,18 @@ VERSION=$(python3 -c \
 echo "Building $APP_NAME v$VERSION..."
 
 # Build
+set +o pipefail  # let xcodebuild exit code propagate through the tee
 xcodebuild \
   -project "$SCRIPT_DIR/VirtualiCloud.xcodeproj" \
   -scheme "$SCHEME" \
   -configuration Release \
   -derivedDataPath "$BUILD_DIR" \
-  build 2>&1 \
-  | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" \
-  | grep -v "DVTPlugin" || true
+  build 2>&1 | tee /tmp/xcodebuild.log | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | grep -v "DVTPlugin" || true
+set -o pipefail
 
-if [ ! -d "$APP" ]; then
-  echo "Build failed — $APP not found"
+if ! grep -q "BUILD SUCCEEDED" /tmp/xcodebuild.log; then
+  echo "Build failed. Full log:"
+  cat /tmp/xcodebuild.log
   exit 1
 fi
 echo "Build succeeded."
