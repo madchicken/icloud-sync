@@ -6,7 +6,6 @@ dependencies = [
     "pyicloud @ git+https://github.com/timlaing/pyicloud.git",
     "watchdog>=4.0",
     "keyring>=25.0",
-    "rumps>=0.4",
 ]
 
 [tool.setuptools.packages.find]
@@ -14,32 +13,3 @@ include = ["icloud_sync*"]
 
 [project.scripts]
 icloud-sync = "icloud_sync.cli:main"
-icloud-sync-tray = "icloud_sync.tray_app:main"
-
-# ---------------------------------------------------------------------------
-# Briefcase — standalone .app / DMG packaging
-# ---------------------------------------------------------------------------
-[tool.briefcase]
-project_name = "iCloud Sync"
-bundle = "com.icloud-sync"
-version = "0.1.1"
-url = "https://github.com/madchicken/icloud-sync"
-license.text = "MIT"
-author = "madchicken"
-
-[tool.briefcase.app.icloud_sync]
-formal_name = "iCloud Sync"
-description = "iCloud Drive sync for MDM-restricted Macs"
-icon = "AppIcon"
-sources = ["icloud_sync"]
-requires = [
-    "pyicloud @ git+https://github.com/timlaing/pyicloud.git",
-    "watchdog>=4.0",
-    "keyring>=25.0",
-    # rumps is source-only on PyPI (no wheel); installed separately after briefcase create
-]
-
-[tool.briefcase.app.icloud_sync.macOS]
-# LSUIElement suppresses the Dock icon — menu bar only app
-info."LSUIElement" = true
-info."NSUserNotificationAlertStyle" = "alert"

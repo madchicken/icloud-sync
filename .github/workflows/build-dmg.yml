@@ -29,46 +29,18 @@ jobs:
           echo "Version: $VERSION"
 
       - name: Generate icons
-        run: python3 scripts/make_icon.py
-
-      - name: Install Briefcase
-        run: pip install briefcase
-
-      # rumps has no wheel on PyPI; Briefcase uses --only-binary :all: which would fail.
-      # Patch pyproject.toml to remove rumps from [project].dependencies before create,
-      # then install it from source into the Briefcase Python after creation.
-      - name: Patch out rumps before briefcase create
         run: |
-          python3 - <<'EOF'
-          import re, pathlib
-          p = pathlib.Path("pyproject.toml")
-          t = p.read_text()
-          t = re.sub(r'\s*"rumps>=0\.4",?\n', '\n', t)
-          p.write_text(t)
-          print("Patched pyproject.toml — rumps removed from [project].dependencies")
-          EOF
+          pip install cairosvg
+          python3 scripts/make_menubar_icon.py
+          python3 scripts/make_icon.py
 
-      - name: Create app
-        run: briefcase create macOS app
-
-      # Briefcase uses app_packages/ for installed deps (no traditional Python binary).
-      # Install rumps from source directly into the Briefcase app_packages directory.
-      - name: Install rumps into Briefcase app_packages
-        run: |
-          TARGET=$(find build -type d -name "app_packages" | head -1)
-          echo "app_packages: $TARGET"
-          pip install --target "$TARGET" rumps
-
-      - name: Build app
-        run: briefcase build macOS app
-
-      - name: Package DMG
-        run: briefcase package macOS app --adhoc-sign
+      - name: Build Swift app
+        run: bash VirtualiCloud/build.sh
 
       - name: Locate DMG
         id: dmg
         run: |
-          DMG=$(find dist -name "*.dmg" | head -1)
+          DMG=$(find VirtualiCloud/dist -name "*.dmg" | head -1)
           echo "dmg=$DMG" >> "$GITHUB_OUTPUT"
           echo "DMG: $DMG"
 
