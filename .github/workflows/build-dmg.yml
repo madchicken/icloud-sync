@@ -23,6 +23,12 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION"
 
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec VirtualiCloud/project.yml
+
       - name: Build Swift app
         run: bash VirtualiCloud/build.sh
 
