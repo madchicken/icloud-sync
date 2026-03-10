@@ -16,23 +16,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
       - name: Read version
         id: version
         run: |
           VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION"
-
-      - name: Generate icons
-        run: |
-          pip install cairosvg
-          python3 scripts/make_menubar_icon.py
-          python3 scripts/make_icon.py
 
       - name: Build Swift app
         run: bash VirtualiCloud/build.sh
