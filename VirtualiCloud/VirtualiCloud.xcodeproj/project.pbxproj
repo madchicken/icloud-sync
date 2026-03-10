@@ -14,6 +14,7 @@
 		384DF7CA9A1EAFCDA088798E /* UNHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BDAB2CA400EADFFF319FC09 /* UNHelper.swift */; };
 		49AAF948C026D7421E4E7F9F /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24C0503017A60B71FBE40C54 /* ConfigStore.swift */; };
 		4E2EE3DA9BFFE3837D7CBC5C /* SettingsDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CAEB41296A8E44242CF993 /* SettingsDialog.swift */; };
+		693C4A91C6FE95408093DDFE /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A44EC53DF030259C4F93A238 /* AppIcon.icns */; };
 		6AF108846F99B4CA1274F3B5 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819536AF59D8E1525F0E0370 /* StatusBarController.swift */; };
 		747B7C399058C1CB15EA1541 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5EEAEC833EBD8C4D70698887 /* UserNotifications.framework */; };
 		8116C6B3D1DEEF13304CFFE2 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 268C5941E721712A1624CDC4 /* ServiceManagement.framework */; };
@@ -43,6 +44,7 @@
 		977077BA44AE4974A6E81056 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		97B37496F4FA0EC926C54716 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		9D6BA459DAC86B810CBA2964 /* SetupHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupHelper.swift; sourceTree = "<group>"; };
+		A44EC53DF030259C4F93A238 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		A9E6A2B46197E60FB97EFDCD /* menubarTemplate.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = menubarTemplate.png; sourceTree = "<group>"; };
 		B9CAEB41296A8E44242CF993 /* SettingsDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDialog.swift; sourceTree = "<group>"; };
 		CD4CD9723058F27E5DD8CAD3 /* DaemonManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonManager.swift; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 		01B5332355FA4155DB85320F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A44EC53DF030259C4F93A238 /* AppIcon.icns */,
 				A9E6A2B46197E60FB97EFDCD /* menubarTemplate.png */,
 				E14DAC686828584A621A62FF /* menubarTemplate@2x.png */,
 			);
@@ -237,6 +240,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				693C4A91C6FE95408093DDFE /* AppIcon.icns in Resources */,
 				A410D09628430EE2F9BEC89C /* menubarTemplate.png in Resources */,
 				CD39C723A2308F37FA3A3741 /* menubarTemplate@2x.png in Resources */,
 			);
