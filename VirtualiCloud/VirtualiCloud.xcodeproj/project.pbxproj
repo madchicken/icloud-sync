@@ -19,9 +19,11 @@
 		8116C6B3D1DEEF13304CFFE2 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 268C5941E721712A1624CDC4 /* ServiceManagement.framework */; };
 		96C7DF0201C9238C2BF92E6D /* PairingsDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF01D4F0DEB8582683330A4 /* PairingsDialog.swift */; };
 		9954CB5AAD006119D74C6A70 /* VirtualiCloudApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221BDE24FF73E2641CA2B428 /* VirtualiCloudApp.swift */; };
+		A410D09628430EE2F9BEC89C /* menubarTemplate.png in Resources */ = {isa = PBXBuildFile; fileRef = A9E6A2B46197E60FB97EFDCD /* menubarTemplate.png */; };
 		B48248CF655B56B3C7A5845D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B37496F4FA0EC926C54716 /* Models.swift */; };
 		B73DA2356BEBA8EADD48B0F1 /* LaunchAtLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1DEB29C7FCC8AF8ED823F8 /* LaunchAtLogin.swift */; };
 		BF704475558DA7C031A445FB /* SetupHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D6BA459DAC86B810CBA2964 /* SetupHelper.swift */; };
+		CD39C723A2308F37FA3A3741 /* menubarTemplate@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E14DAC686828584A621A62FF /* menubarTemplate@2x.png */; };
 		CD9D238FA95D31F01433757E /* PrefsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68C4D549A1B1D0006EC2C6FE /* PrefsStore.swift */; };
 /* End PBXBuildFile section */
 
@@ -41,8 +43,10 @@
 		977077BA44AE4974A6E81056 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		97B37496F4FA0EC926C54716 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		9D6BA459DAC86B810CBA2964 /* SetupHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupHelper.swift; sourceTree = "<group>"; };
+		A9E6A2B46197E60FB97EFDCD /* menubarTemplate.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = menubarTemplate.png; sourceTree = "<group>"; };
 		B9CAEB41296A8E44242CF993 /* SettingsDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDialog.swift; sourceTree = "<group>"; };
 		CD4CD9723058F27E5DD8CAD3 /* DaemonManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonManager.swift; sourceTree = "<group>"; };
+		E14DAC686828584A621A62FF /* menubarTemplate@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "menubarTemplate@2x.png"; sourceTree = "<group>"; };
 		F19F00CD3757DB6F666529D1 /* VirtualiCloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualiCloud.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -59,6 +63,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		01B5332355FA4155DB85320F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A9E6A2B46197E60FB97EFDCD /* menubarTemplate.png */,
+				E14DAC686828584A621A62FF /* menubarTemplate@2x.png */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		13C39274460A03552343F7C5 /* Keychain */ = {
 			isa = PBXGroup;
 			children = (
@@ -129,6 +142,7 @@
 				87FC01035A4CCA31FD50C3EF /* Daemon */,
 				13C39274460A03552343F7C5 /* Keychain */,
 				1B5F45FBF0280E36699A2E29 /* MenuBar */,
+				01B5332355FA4155DB85320F /* Resources */,
 				229627FD1546BC0FB512760F /* UI */,
 				F5185D2BD6D7A8D0F8CAE282 /* Util */,
 			);
@@ -171,6 +185,7 @@
 			buildConfigurationList = 2114E15C2DDF9A38D0E211B1 /* Build configuration list for PBXNativeTarget "VirtualiCloud" */;
 			buildPhases = (
 				494EFBBCC46FDE9462B4855A /* Sources */,
+				D66DEB21157EAC40048C8A13 /* Resources */,
 				4129D602C88BB43F092ED437 /* Frameworks */,
 			);
 			buildRules = (
@@ -216,6 +231,18 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D66DEB21157EAC40048C8A13 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A410D09628430EE2F9BEC89C /* menubarTemplate.png in Resources */,
+				CD39C723A2308F37FA3A3741 /* menubarTemplate@2x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		494EFBBCC46FDE9462B4855A /* Sources */ = {
