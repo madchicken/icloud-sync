@@ -1,0 +1,438 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04CB0823F510BBF6922997CC /* ShellRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C83739976105A1A6D45F700 /* ShellRunner.swift */; };
+		0ADF6E0AF20D2C10EC348C62 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8250366D9155AC6F746866 /* KeychainStore.swift */; };
+		20E20ECD5E61618DFCE43553 /* DaemonManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD4CD9723058F27E5DD8CAD3 /* DaemonManager.swift */; };
+		3300A9133F327EF682F9D97B /* UninstallHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61197DD54701B7AE801AEAAA /* UninstallHelper.swift */; };
+		384DF7CA9A1EAFCDA088798E /* UNHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BDAB2CA400EADFFF319FC09 /* UNHelper.swift */; };
+		49AAF948C026D7421E4E7F9F /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24C0503017A60B71FBE40C54 /* ConfigStore.swift */; };
+		4E2EE3DA9BFFE3837D7CBC5C /* SettingsDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CAEB41296A8E44242CF993 /* SettingsDialog.swift */; };
+		6AF108846F99B4CA1274F3B5 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819536AF59D8E1525F0E0370 /* StatusBarController.swift */; };
+		747B7C399058C1CB15EA1541 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5EEAEC833EBD8C4D70698887 /* UserNotifications.framework */; };
+		8116C6B3D1DEEF13304CFFE2 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 268C5941E721712A1624CDC4 /* ServiceManagement.framework */; };
+		96C7DF0201C9238C2BF92E6D /* PairingsDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF01D4F0DEB8582683330A4 /* PairingsDialog.swift */; };
+		9954CB5AAD006119D74C6A70 /* VirtualiCloudApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221BDE24FF73E2641CA2B428 /* VirtualiCloudApp.swift */; };
+		B48248CF655B56B3C7A5845D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B37496F4FA0EC926C54716 /* Models.swift */; };
+		B73DA2356BEBA8EADD48B0F1 /* LaunchAtLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1DEB29C7FCC8AF8ED823F8 /* LaunchAtLogin.swift */; };
+		BF704475558DA7C031A445FB /* SetupHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D6BA459DAC86B810CBA2964 /* SetupHelper.swift */; };
+		CD9D238FA95D31F01433757E /* PrefsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68C4D549A1B1D0006EC2C6FE /* PrefsStore.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0D8250366D9155AC6F746866 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		221BDE24FF73E2641CA2B428 /* VirtualiCloudApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualiCloudApp.swift; sourceTree = "<group>"; };
+		24C0503017A60B71FBE40C54 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
+		268C5941E721712A1624CDC4 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ServiceManagement.framework; sourceTree = "<group>"; };
+		3B1DEB29C7FCC8AF8ED823F8 /* LaunchAtLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLogin.swift; sourceTree = "<group>"; };
+		5CF01D4F0DEB8582683330A4 /* PairingsDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingsDialog.swift; sourceTree = "<group>"; };
+		5EEAEC833EBD8C4D70698887 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = UserNotifications.framework; sourceTree = "<group>"; };
+		61197DD54701B7AE801AEAAA /* UninstallHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallHelper.swift; sourceTree = "<group>"; };
+		68C4D549A1B1D0006EC2C6FE /* PrefsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefsStore.swift; sourceTree = "<group>"; };
+		6BDAB2CA400EADFFF319FC09 /* UNHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UNHelper.swift; sourceTree = "<group>"; };
+		819536AF59D8E1525F0E0370 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		8C83739976105A1A6D45F700 /* ShellRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellRunner.swift; sourceTree = "<group>"; };
+		977077BA44AE4974A6E81056 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		97B37496F4FA0EC926C54716 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		9D6BA459DAC86B810CBA2964 /* SetupHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupHelper.swift; sourceTree = "<group>"; };
+		B9CAEB41296A8E44242CF993 /* SettingsDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDialog.swift; sourceTree = "<group>"; };
+		CD4CD9723058F27E5DD8CAD3 /* DaemonManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonManager.swift; sourceTree = "<group>"; };
+		F19F00CD3757DB6F666529D1 /* VirtualiCloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualiCloud.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4129D602C88BB43F092ED437 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8116C6B3D1DEEF13304CFFE2 /* ServiceManagement.framework in Frameworks */,
+				747B7C399058C1CB15EA1541 /* UserNotifications.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		13C39274460A03552343F7C5 /* Keychain */ = {
+			isa = PBXGroup;
+			children = (
+				0D8250366D9155AC6F746866 /* KeychainStore.swift */,
+			);
+			path = Keychain;
+			sourceTree = "<group>";
+		};
+		1B5F45FBF0280E36699A2E29 /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				819536AF59D8E1525F0E0370 /* StatusBarController.swift */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		1FA7ABA74057C439104C594C = {
+			isa = PBXGroup;
+			children = (
+				B3B268676E82F7E6D3A2ED67 /* VirtualiCloud */,
+				5088AC79F643840D0CFB001A /* Frameworks */,
+				230FBBADD15685075D44079C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		229627FD1546BC0FB512760F /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				5CF01D4F0DEB8582683330A4 /* PairingsDialog.swift */,
+				B9CAEB41296A8E44242CF993 /* SettingsDialog.swift */,
+				9D6BA459DAC86B810CBA2964 /* SetupHelper.swift */,
+				61197DD54701B7AE801AEAAA /* UninstallHelper.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		230FBBADD15685075D44079C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F19F00CD3757DB6F666529D1 /* VirtualiCloud.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5088AC79F643840D0CFB001A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				268C5941E721712A1624CDC4 /* ServiceManagement.framework */,
+				5EEAEC833EBD8C4D70698887 /* UserNotifications.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		87FC01035A4CCA31FD50C3EF /* Daemon */ = {
+			isa = PBXGroup;
+			children = (
+				CD4CD9723058F27E5DD8CAD3 /* DaemonManager.swift */,
+			);
+			path = Daemon;
+			sourceTree = "<group>";
+		};
+		B3B268676E82F7E6D3A2ED67 /* VirtualiCloud */ = {
+			isa = PBXGroup;
+			children = (
+				977077BA44AE4974A6E81056 /* Info.plist */,
+				F811D61DC81A3BAE6C9457FE /* App */,
+				C246D6D5A6159DC5EA36D17A /* Config */,
+				87FC01035A4CCA31FD50C3EF /* Daemon */,
+				13C39274460A03552343F7C5 /* Keychain */,
+				1B5F45FBF0280E36699A2E29 /* MenuBar */,
+				229627FD1546BC0FB512760F /* UI */,
+				F5185D2BD6D7A8D0F8CAE282 /* Util */,
+			);
+			path = VirtualiCloud;
+			sourceTree = "<group>";
+		};
+		C246D6D5A6159DC5EA36D17A /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				24C0503017A60B71FBE40C54 /* ConfigStore.swift */,
+				97B37496F4FA0EC926C54716 /* Models.swift */,
+				68C4D549A1B1D0006EC2C6FE /* PrefsStore.swift */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		F5185D2BD6D7A8D0F8CAE282 /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				3B1DEB29C7FCC8AF8ED823F8 /* LaunchAtLogin.swift */,
+				8C83739976105A1A6D45F700 /* ShellRunner.swift */,
+				6BDAB2CA400EADFFF319FC09 /* UNHelper.swift */,
+			);
+			path = Util;
+			sourceTree = "<group>";
+		};
+		F811D61DC81A3BAE6C9457FE /* App */ = {
+			isa = PBXGroup;
+			children = (
+				221BDE24FF73E2641CA2B428 /* VirtualiCloudApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5CC4D833BD0C7E22F66CFCA9 /* VirtualiCloud */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2114E15C2DDF9A38D0E211B1 /* Build configuration list for PBXNativeTarget "VirtualiCloud" */;
+			buildPhases = (
+				494EFBBCC46FDE9462B4855A /* Sources */,
+				4129D602C88BB43F092ED437 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VirtualiCloud;
+			packageProductDependencies = (
+			);
+			productName = VirtualiCloud;
+			productReference = F19F00CD3757DB6F666529D1 /* VirtualiCloud.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D0AD948DA57ED66117886D39 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					5CC4D833BD0C7E22F66CFCA9 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = D54845A01008063EB7F003F3 /* Build configuration list for PBXProject "VirtualiCloud" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1FA7ABA74057C439104C594C;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 230FBBADD15685075D44079C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5CC4D833BD0C7E22F66CFCA9 /* VirtualiCloud */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		494EFBBCC46FDE9462B4855A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49AAF948C026D7421E4E7F9F /* ConfigStore.swift in Sources */,
+				20E20ECD5E61618DFCE43553 /* DaemonManager.swift in Sources */,
+				0ADF6E0AF20D2C10EC348C62 /* KeychainStore.swift in Sources */,
+				B73DA2356BEBA8EADD48B0F1 /* LaunchAtLogin.swift in Sources */,
+				B48248CF655B56B3C7A5845D /* Models.swift in Sources */,
+				96C7DF0201C9238C2BF92E6D /* PairingsDialog.swift in Sources */,
+				CD9D238FA95D31F01433757E /* PrefsStore.swift in Sources */,
+				4E2EE3DA9BFFE3837D7CBC5C /* SettingsDialog.swift in Sources */,
+				BF704475558DA7C031A445FB /* SetupHelper.swift in Sources */,
+				04CB0823F510BBF6922997CC /* ShellRunner.swift in Sources */,
+				6AF108846F99B4CA1274F3B5 /* StatusBarController.swift in Sources */,
+				384DF7CA9A1EAFCDA088798E /* UNHelper.swift in Sources */,
+				3300A9133F327EF682F9D97B /* UninstallHelper.swift in Sources */,
+				9954CB5AAD006119D74C6A70 /* VirtualiCloudApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		57BCE591CDE102650B635D85 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\".\"",
+				);
+				INFOPLIST_FILE = VirtualiCloud/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_NAME = "iCloud Sync";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		7C2AB0BA66F10783AEAA3767 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\".\"",
+				);
+				INFOPLIST_FILE = VirtualiCloud/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_NAME = "iCloud Sync";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		BF79A992373677D12DD139B5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 0.1.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.icloud-sync.tray";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		D731FB83678FA92B25E244E9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 0.1.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.icloud-sync.tray";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2114E15C2DDF9A38D0E211B1 /* Build configuration list for PBXNativeTarget "VirtualiCloud" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				57BCE591CDE102650B635D85 /* Debug */,
+				7C2AB0BA66F10783AEAA3767 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D54845A01008063EB7F003F3 /* Build configuration list for PBXProject "VirtualiCloud" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D731FB83678FA92B25E244E9 /* Debug */,
+				BF79A992373677D12DD139B5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D0AD948DA57ED66117886D39 /* Project object */;
+}

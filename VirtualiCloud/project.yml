@@ -1,0 +1,46 @@
+name: VirtualiCloud
+options:
+  bundleIdPrefix: com.icloud-sync
+  deploymentTarget:
+    macOS: "13.0"
+  xcodeVersion: "15"
+
+settings:
+  base:
+    PRODUCT_BUNDLE_IDENTIFIER: com.icloud-sync.tray
+    MARKETING_VERSION: "0.1.1"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_IDENTITY: "-"
+    ENABLE_HARDENED_RUNTIME: NO
+
+targets:
+  VirtualiCloud:
+    type: application
+    platform: macOS
+    sources:
+      - path: VirtualiCloud
+        excludes:
+          - "**/.DS_Store"
+    info:
+      path: VirtualiCloud/Info.plist
+      properties:
+        LSUIElement: true
+        NSUserNotificationAlertStyle: alert
+        NSPrincipalClass: NSApplication
+        NSAppleEventsUsageDescription: "iCloud Sync uses AppleScript to open Terminal for the setup wizard."
+        NSUserNotificationsUsageDescription: "iCloud Sync sends notifications about sync status."
+        CFBundleDisplayName: "iCloud Sync"
+        CFBundleIconFile: AppIcon
+        LSMinimumSystemVersion: "13.0"
+    settings:
+      base:
+        INFOPLIST_FILE: VirtualiCloud/Info.plist
+        PRODUCT_NAME: "iCloud Sync"
+    dependencies:
+      - framework: ServiceManagement.framework
+        embed: false
+      - framework: UserNotifications.framework
+        embed: false
