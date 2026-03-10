@@ -33,9 +33,30 @@ if ! grep -q "BUILD SUCCEEDED" /tmp/xcodebuild.log; then
 fi
 echo "Build succeeded."
 
-# Sign
+# Bundle Python venv
+# Install the Python daemon inside the .app so it works on any Mac
+# without requiring a separate pip install.
+RESOURCES="$APP/Contents/Resources"
+VENV="$RESOURCES/venv"
+echo "Bundling Python venv..."
+python3 -m venv "$VENV"
+"$VENV/bin/pip" install --quiet --upgrade pip
+"$VENV/bin/pip" install --quiet "$SCRIPT_DIR/.."
+echo "Bundled: $("$VENV/bin/icloud-sync" --help 2>&1 | head -1 || echo 'installed')"
+
+# Sign venv Mach-O binaries before sealing the bundle
+echo "Pre-signing venv binaries..."
+while IFS= read -r f; do
+  if file "$f" | grep -q "Mach-O"; then
+    codesign --force --sign - "$f" 2>/dev/null || true
+  fi
+done < <(find "$VENV/bin" -type f)
+find "$VENV" \( -name "*.so" -o -name "*.dylib" \) \
+  -exec codesign --force --sign - {} \; 2>/dev/null || true
+
+# Sign the whole bundle
 echo "Signing..."
-codesign --force --deep --sign - "$APP"
+codesign --force --sign - "$APP"
 
 # DMG
 echo "Creating DMG..."

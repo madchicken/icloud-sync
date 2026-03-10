@@ -12,13 +12,13 @@ final class DaemonManager {
     }
 
     func start() {
-        guard let binary = findDaemonBinary() else {
+        guard let (executable, arguments) = findDaemonCommand() else {
             UNHelper.post(title: "iCloud Sync", body: "Cannot find icloud-sync binary.")
             return
         }
         let p = Process()
-        p.executableURL = URL(fileURLWithPath: binary)
-        p.arguments = ["start"]
+        p.executableURL = URL(fileURLWithPath: executable)
+        p.arguments = arguments
         p.standardOutput = FileHandle.nullDevice
         p.standardError  = FileHandle.nullDevice
         p.terminationHandler = { [weak self] _ in
@@ -64,11 +64,21 @@ final class DaemonManager {
 
     // MARK: — Binary discovery
 
-    private func findDaemonBinary() -> String? {
-        // 1. Bundled alongside the .app (distribution)
+    /// Returns (executable, arguments) so the caller can do Process.executableURL = executable,
+    /// Process.arguments = arguments + ["start"].
+    ///
+    /// Bundled case:  python3 path + [script path, "start"]
+    ///   — avoids relying on the shebang which points to the build machine's Python.
+    /// PATH case:     icloud-sync path + ["start"]
+    private func findDaemonCommand() -> (executable: String, arguments: [String])? {
+        // 1. Bundled venv inside the .app
         if let resourcePath = Bundle.main.resourcePath {
-            let candidate = "\(resourcePath)/venv/bin/icloud-sync"
-            if FileManager.default.isExecutableFile(atPath: candidate) { return candidate }
+            let python = "\(resourcePath)/venv/bin/python3"
+            let script = "\(resourcePath)/venv/bin/icloud-sync"
+            if FileManager.default.isExecutableFile(atPath: python) &&
+               FileManager.default.fileExists(atPath: script) {
+                return (python, [script, "start"])
+            }
         }
         // 2. PATH lookup (development)
         let task = Process()
@@ -81,6 +91,6 @@ final class DaemonManager {
         task.waitUntilExit()
         let output = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return output.isEmpty ? nil : output
+        return output.isEmpty ? nil : (output, ["start"])
     }
 }
