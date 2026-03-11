@@ -14,77 +14,71 @@ iCloud-Sync works around this by talking directly to iCloud's API (via [pyicloud
 
 ## Features
 
-- **Menu bar app** — start/stop the daemon, manage sync pairs, and configure settings from the macOS status bar
+- **Native Swift menu bar app** — start/stop the daemon, manage sync pairs, and configure settings from the macOS status bar
+- **Self-contained** — no Python installation required; the `.app` bundle includes its own Python runtime and daemon
 - **Multi-folder sync** — sync as many iCloud Drive ↔ local folder pairs as you need
-- **Native dialogs** — setup, authentication, and 2FA all use standard macOS system dialogs (no terminal required)
+- **Native dialogs** — setup, authentication, and 2FA all use standard macOS dialogs
 - **Automatic reload** — adding or removing a sync pair takes effect immediately without restarting the daemon
-- **Start at login** — optional LaunchAgent installs automatically from the Settings dialog
+- **Start at login** — configurable from the Settings dialog
 - **Conflict handling** — last-write-wins; the losing version is preserved as `.conflict-TIMESTAMP.ext`
 
 ## How it works
 
+- **Menu bar app** is a native Swift/AppKit app (no Dock icon)
+- **Sync daemon** is a Python background process bundled inside the app
 - **Local changes** are detected instantly via `watchdog` (filesystem events)
 - **Remote changes** are detected by polling iCloud Drive every 60 seconds (iCloud has no push API)
 - **Session** is kept alive with periodic refresh; Apple sessions last ~2 months
 
 ## Requirements
 
-**To run the app:** macOS 13+. No Python installation required — the `.app` bundle includes its own.
+**To run:** macOS 13+. No Python installation required — the `.app` bundle includes its own.
 
-**To build from source:** macOS 13+, Python 3.11+, Xcode command-line tools.
+**To build from source:** macOS 13+, Python 3.11+, Xcode 15+.
 
 ## Installation
 
-### 1. Clone and install
+### Download (recommended)
+
+Download the latest `iCloud Sync.dmg` from the [Releases](https://github.com/madchicken/icloud-sync/releases) page, open it, and drag **iCloud Sync.app** to your Applications folder.
+
+Because the app is ad-hoc signed (no Apple Developer ID), remove the quarantine flag once after installing:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/iCloud Sync.app"
+```
+
+### Build from source
 
 ```bash
 git clone https://github.com/madchicken/icloud-sync.git
-cd icloud-sync
-python -m venv .venv
-.venv/bin/pip install -e .
+cd icloud-sync/VirtualiCloud
+bash build.sh
 ```
 
-### 2. Build the .app bundle
+This produces `VirtualiCloud/dist/iCloud Sync.dmg`.
 
-Generate the icon and build the app:
+## First launch
 
-```bash
-.venv/bin/python scripts/make_icon.py
-bash scripts/build_app.sh
-```
+1. Click the cloud icon in the menu bar → **Setup / Credentials…**
+2. A Terminal window opens — enter your Apple ID, password, and 2FA code
+3. Once setup is complete, go to **Pairings…** to add your first sync pair
+4. Click **Start** to begin syncing
 
-This produces `dist/iCloud Sync.app`.
+Credentials are stored securely in the macOS Keychain.
 
-### 3. Install the app
+## Menu bar
 
-```bash
-cp -r "dist/iCloud Sync.app" /Applications/
-```
-
-Because the app is unsigned, macOS quarantines it when downloaded. Remove the quarantine flag after copying:
-
-```bash
-xattr -d com.apple.quarantine "/Applications/iCloud Sync.app"
-```
-
-Or right-click the app → **Open** → **Open** in the dialog (one-time only).
-
-### 4. Sign in
-
-Click the cloud icon in the menu bar → **Setup / Credentials…**
-
-The setup wizard will ask for your Apple ID, password, and 2FA code using native macOS dialogs. Credentials are stored securely in the macOS Keychain.
-
-## Menu bar usage
-
-| Menu item | Description |
+| Item | Description |
 |---|---|
+| **● Running / ○ Stopped** | Current daemon status |
 | **Start / Stop** | Start or stop the sync daemon |
-| **Sync Pairs** | See all configured sync pairs |
-| **Pairings…** | Add or remove iCloud ↔ local folder pairs |
-| **Settings…** | Start at login, auto-start daemon, polling interval |
+| **Sync Pairs** | List of configured sync pairs |
+| **Pairings…** | Add or remove iCloud Drive ↔ local folder pairs |
 | **Setup / Credentials…** | Sign in or update your Apple ID credentials |
-| **Open Log** | Open the sync log in Console |
+| **Settings…** | Start at login, auto-start daemon, polling interval |
+| **Open Log** | Open the sync log |
+| **Uninstall…** | Remove the app and all associated files |
 
 ## Sync behaviour
 
@@ -98,40 +92,45 @@ The setup wizard will ask for your Apple ID, password, and 2FA code using native
 | Deleted on remote | Delete local |
 | Deleted on local | Delete remote |
 
-Files never synced: `.DS_Store`, `*.tmp`, `*.part`, hidden files (`.`-prefixed), `desktop.ini`, `Thumbs.db`.
+Files never synced: `.DS_Store`, `*.tmp`, `*.part`, hidden files, `desktop.ini`, `Thumbs.db`.
 
 ## Two-factor authentication
 
-During initial setup, 2FA is handled via a native dialog — just enter the code that appears on your trusted Apple device.
-
-When the session expires (~2 months), re-run **Setup / Credentials…** from the menu bar to refresh it.
+During initial setup a Terminal window opens running `icloud-sync setup`, which handles 2FA interactively. When the session expires (~2 months), re-run **Setup / Credentials…** from the menu bar.
 
 ## Project structure
 
 ```
 icloud-sync/
-├── icloud_sync/
-│   ├── tray_app.py     — menu bar app (rumps)
-│   ├── cli.py          — icloud-sync CLI entry point
-│   ├── auth.py         — keychain helpers, authentication, 2FA handling
-│   ├── config.py       — config, sync pairs, PID file, preferences
-│   ├── state.py        — sync state persistence (JSON)
-│   ├── engine.py       — reconciliation logic
-│   ├── watcher.py      — local filesystem watcher (watchdog)
-│   └── sync_daemon.py  — daemon main loop
+├── VirtualiCloud/              — native Swift menu bar app (Xcode project)
+│   ├── project.yml             — xcodegen spec
+│   ├── build.sh                — build + sign + package DMG
+│   └── VirtualiCloud/
+│       ├── App/                — entry point, AppDelegate
+│       ├── MenuBar/            — NSStatusItem, menu construction
+│       ├── Daemon/             — spawn/stop/monitor Python daemon
+│       ├── Config/             — read shared config.json
+│       ├── Keychain/           — Security framework (shared with Python)
+│       └── UI/                 — Pairings, Settings, Setup, Uninstall dialogs
+├── icloud_sync/                — Python sync daemon
+│   ├── cli.py                  — icloud-sync CLI (setup, start, add-pair…)
+│   ├── sync_daemon.py          — daemon main loop
+│   ├── engine.py               — reconciliation logic
+│   ├── watcher.py              — local filesystem watcher (watchdog)
+│   ├── auth.py                 — Keychain helpers, authentication, 2FA
+│   └── config.py               — config, sync pairs, PID file, preferences
 ├── scripts/
-│   ├── make_icon.py    — generates AppIcon.icns and menu bar template image
-│   ├── build_app.sh    — assembles and signs the .app bundle
-│   └── launcher.c      — C binary launcher (required by Gatekeeper)
-└── com.icloud.sync.plist  — launchd agent template (manual install)
+│   ├── make_icon.py            — generates AppIcon.icns from iCloud-sync-icon.png
+│   └── make_menubar_icon.py    — generates menu bar template images
+└── com.icloud.sync.plist       — launchd agent template (optional CLI use)
 ```
 
 ## Limitations
 
-- iCloud Drive has no push API — remote changes are detected by polling (default: every 60 seconds)
+- iCloud Drive has no push API — remote changes are polled every 60 seconds
 - Only top-level iCloud Drive folders can be selected as sync targets
 - Does not sync shared folders or iCloud shared albums
-- The `.app` bundle is macOS-only and must be built on macOS (no cross-compilation)
+- macOS 13+ only
 
 ## License
 
