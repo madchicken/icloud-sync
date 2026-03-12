@@ -11,6 +11,7 @@ jobs:
     runs-on: macos-latest
     permissions:
       contents: write
+      pages: write
 
     steps:
       - name: Checkout
@@ -37,7 +38,79 @@ jobs:
         run: |
           DMG=$(find VirtualiCloud/dist -name "*.dmg" | head -1)
           echo "dmg=$DMG" >> "$GITHUB_OUTPUT"
+          echo "dmg_name=$(basename "$DMG")" >> "$GITHUB_OUTPUT"
           echo "DMG: $DMG"
+
+      - name: Download Sparkle
+        id: sparkle
+        run: |
+          SPARKLE_VER="2.9.0"
+          curl -sL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VER}/Sparkle-${SPARKLE_VER}.tar.xz" -o /tmp/sparkle.tar.xz
+          mkdir -p /tmp/sparkle
+          tar xf /tmp/sparkle.tar.xz -C /tmp/sparkle
+          echo "bin=/tmp/sparkle/bin" >> "$GITHUB_OUTPUT"
+
+      - name: Sign update with Sparkle (EdDSA)
+        if: startsWith(github.ref, 'refs/tags/')
+        id: sign
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          DMG="${{ steps.dmg.outputs.dmg }}"
+          SIGN_OUTPUT=$("${{ steps.sparkle.outputs.bin }}/sign_update" "$DMG" --ed-key-file <(echo "$SPARKLE_PRIVATE_KEY"))
+          echo "signature=$SIGN_OUTPUT" >> "$GITHUB_OUTPUT"
+          echo "Sparkle signature: $SIGN_OUTPUT"
+
+      - name: Generate appcast.xml
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          DMG_NAME: ${{ steps.dmg.outputs.dmg_name }}
+          SIGN_OUTPUT: ${{ steps.sign.outputs.signature }}
+        run: |
+          DMG="${{ steps.dmg.outputs.dmg }}"
+          DMG_SIZE=$(stat -f%z "$DMG")
+          TAG="${GITHUB_REF#refs/tags/}"
+
+          # Parse edSignature and length from sign_update output
+          ED_SIGNATURE=$(echo "$SIGN_OUTPUT" | grep -o 'sparkle:edSignature="[^"]*"' | cut -d'"' -f2)
+          ED_LENGTH=$(echo "$SIGN_OUTPUT" | grep -o 'length="[^"]*"' | cut -d'"' -f2)
+
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${DMG_NAME}"
+
+          mkdir -p /tmp/pages
+          cat > /tmp/pages/appcast.xml << APPCAST_EOF
+          <?xml version="1.0" standalone="yes"?>
+          <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+            <channel>
+              <title>iCloud Sync</title>
+              <item>
+                <title>Version ${VERSION}</title>
+                <sparkle:version>${VERSION}</sparkle:version>
+                <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
+                <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+                <pubDate>$(date -R)</pubDate>
+                <enclosure
+                  url="${DOWNLOAD_URL}"
+                  type="application/octet-stream"
+                  sparkle:edSignature="${ED_SIGNATURE}"
+                  length="${ED_LENGTH}"
+                />
+              </item>
+            </channel>
+          </rss>
+          APPCAST_EOF
+
+          echo "Generated appcast.xml:"
+          cat /tmp/pages/appcast.xml
+
+      - name: Deploy appcast to GitHub Pages
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: /tmp/pages
+          keep_files: false
 
       - name: Upload DMG artifact
         uses: actions/upload-artifact@v4

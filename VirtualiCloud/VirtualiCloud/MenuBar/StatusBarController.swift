@@ -1,10 +1,12 @@
 import AppKit
+import Sparkle
 
 final class StatusBarController {
 
     let daemonManager = DaemonManager()
 
     private let statusItem: NSStatusItem
+    private let updaterController: SPUStandardUpdaterController
     private var refreshTimer: Timer?
 
     // Mutable menu items updated without full menu reconstruction
@@ -13,7 +15,8 @@ final class StatusBarController {
     private var pairsSubmenu    = NSMenu()
     private var pairsMenuItem   = NSMenuItem()
 
-    init() {
+    init(updaterController: SPUStandardUpdaterController) {
+        self.updaterController = updaterController
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         setupIcon()
         buildMenu()
@@ -77,6 +80,14 @@ final class StatusBarController {
         let logItem = NSMenuItem(title: "Open Log", action: #selector(openLog), keyEquivalent: "")
         logItem.target = self
         menu.addItem(logItem)
+
+        let updateItem = NSMenuItem(
+            title: "Check for Updates…",
+            action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)),
+            keyEquivalent: ""
+        )
+        updateItem.target = updaterController
+        menu.addItem(updateItem)
 
         menu.addItem(.separator())
 

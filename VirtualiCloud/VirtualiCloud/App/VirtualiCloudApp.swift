@@ -1,17 +1,28 @@
 import AppKit
+import Sparkle
 
 // Entry point — pure AppKit, no SwiftUI scenes.
 // LSUIElement in Info.plist suppresses the Dock icon.
 final class AppMain: NSObject, NSApplicationDelegate {
 
     private var statusBarController: StatusBarController?
+    let updaterController: SPUStandardUpdaterController
+
+    override init() {
+        updaterController = SPUStandardUpdaterController(
+            startingUpdater: true,
+            updaterDelegate: nil,
+            userDriverDelegate: nil
+        )
+        super.init()
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Belt-and-suspenders alongside LSUIElement = YES in Info.plist
         NSApp.setActivationPolicy(.accessory)
         UNHelper.requestAuthorization()
 
-        statusBarController = StatusBarController()
+        statusBarController = StatusBarController(updaterController: updaterController)
 
         // Auto-start daemon if the preference is set
         if PrefsStore.load().autostartDaemon == true {

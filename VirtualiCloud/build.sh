@@ -14,7 +14,10 @@ VERSION=$(python3 -c \
   "import tomllib; print(tomllib.load(open('$SCRIPT_DIR/../pyproject.toml','rb'))['project']['version'])" \
   2>/dev/null || echo "0.0.0")
 
-echo "Building $APP_NAME v$VERSION..."
+# Monotonic build number from git commit count (Sparkle uses this to compare versions)
+BUILD_NUMBER=$(git -C "$SCRIPT_DIR/.." rev-list --count HEAD 2>/dev/null || echo "1")
+
+echo "Building $APP_NAME v$VERSION (build $BUILD_NUMBER)..."
 
 # Build
 set +o pipefail  # let xcodebuild exit code propagate through the tee
@@ -23,6 +26,7 @@ xcodebuild \
   -scheme "$SCHEME" \
   -configuration Release \
   -derivedDataPath "$BUILD_DIR" \
+  CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
   build 2>&1 | tee /tmp/xcodebuild.log | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | grep -v "DVTPlugin" || true
 set -o pipefail
 
