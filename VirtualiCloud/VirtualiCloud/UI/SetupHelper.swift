@@ -8,7 +8,7 @@ enum SetupHelper {
             UNHelper.post(title: "iCloud Sync", body: "Cannot find icloud-sync CLI.")
             return
         }
-        let escaped = (cmd + ["setup"]).map { $0.replacingOccurrences(of: "\"", with: "\\\"") }.joined(separator: " ")
+        let escaped = (cmd + ["setup"]).map { "'\($0.replacingOccurrences(of: "'", with: "'\\''"))'" }.joined(separator: " ")
         ShellRunner.appleScript("""
         tell application "Terminal"
             activate
