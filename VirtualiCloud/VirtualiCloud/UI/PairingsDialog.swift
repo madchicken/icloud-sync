@@ -38,33 +38,45 @@ enum PairingsDialog {
     }
 
     private static func addPair() {
-        // Step 1: pick local folder
+        guard let cmd = ShellRunner.icloudSyncCommand() else {
+            showDialog("Cannot find icloud-sync CLI.", buttons: ["OK"], title: "iCloud Sync", defaultButton: "OK")
+            return
+        }
+
+        // Step 1: pick iCloud Drive folder (combo box with live folder list)
+        let folders = ICFolderHelper.fetchFolders(cmd: cmd)
+
+        let a = NSAlert()
+        a.messageText = "Select iCloud Drive Folder"
+        a.informativeText = "Pick an existing folder or type a new name:"
+        a.addButton(withTitle: "Next")
+        a.addButton(withTitle: "Cancel")
+
+        let combo = NSComboBox(frame: NSRect(x: 0, y: 0, width: 350, height: 26))
+        combo.completes = true
+        for f in folders { combo.addItem(withObjectValue: f) }
+        if !folders.isEmpty { combo.selectItem(at: 0) }
+        combo.isEditable = true
+        a.accessoryView = combo
+        a.window.initialFirstResponder = combo
+
+        guard a.runModal() == .alertFirstButtonReturn else { return }
+        let remote = combo.stringValue.trimmingCharacters(in: .whitespaces)
+        guard !remote.isEmpty else { return }
+
+        // Step 2: pick local folder
         let panel = NSOpenPanel()
-        panel.title = "Select local folder to sync"
-        panel.message = "Select the local folder to sync:"
+        panel.title = "Select local folder to sync with \"\(remote)\""
+        panel.message = "Choose the local folder:"
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
         panel.allowsMultipleSelection = false
 
         guard panel.runModal() == .OK, let localURL = panel.url else { return }
-        let localPath = localURL.path
 
-        // Step 2: enter remote folder name
-        let remoteDir = inputDialog(
-            "iCloud Drive folder name to sync with:",
-            defaultValue: localURL.lastPathComponent,
-            title: "Add Sync Pair"
-        )
-        guard let remote = remoteDir, !remote.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-
-        // Shell out to the CLI to mutate config (Python is the single config writer)
-        guard let cmd = ShellRunner.icloudSyncCommand() else {
-            showDialog("Cannot find icloud-sync CLI.", buttons: ["OK"], title: "iCloud Sync", defaultButton: "OK")
-            return
-        }
         do {
-            try ShellRunner.run(cmd + ["add-pair", "--local", localPath, "--remote", remote.trimmingCharacters(in: .whitespaces)])
+            try ShellRunner.run(cmd + ["add-pair", "--local", localURL.path, "--remote", remote])
             UNHelper.post(title: "iCloud Sync", body: "Pair added: \(localURL.lastPathComponent) ↔ \(remote)")
         } catch {
             showDialog("Error adding pair:\n\(error.localizedDescription)", buttons: ["OK"], title: "iCloud Sync", defaultButton: "OK")

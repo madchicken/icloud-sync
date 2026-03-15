@@ -19,6 +19,8 @@
 		6AF108846F99B4CA1274F3B5 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819536AF59D8E1525F0E0370 /* StatusBarController.swift */; };
 		747B7C399058C1CB15EA1541 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5EEAEC833EBD8C4D70698887 /* UserNotifications.framework */; };
 		8116C6B3D1DEEF13304CFFE2 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 268C5941E721712A1624CDC4 /* ServiceManagement.framework */; };
+		8F7451D8782C48D6B7B4DC43 /* CredentialsDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976A76B88BAE773D85D9BEC4 /* CredentialsDialog.swift */; };
+		91A50D19CB2B349D807A6041 /* ICFolderHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 083E6DB373CB3D8C01D3F3B2 /* ICFolderHelper.swift */; };
 		96C7DF0201C9238C2BF92E6D /* PairingsDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF01D4F0DEB8582683330A4 /* PairingsDialog.swift */; };
 		9954CB5AAD006119D74C6A70 /* VirtualiCloudApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221BDE24FF73E2641CA2B428 /* VirtualiCloudApp.swift */; };
 		A410D09628430EE2F9BEC89C /* menubarTemplate.png in Resources */ = {isa = PBXBuildFile; fileRef = A9E6A2B46197E60FB97EFDCD /* menubarTemplate.png */; };
@@ -30,6 +32,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		083E6DB373CB3D8C01D3F3B2 /* ICFolderHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICFolderHelper.swift; sourceTree = "<group>"; };
 		0D8250366D9155AC6F746866 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		221BDE24FF73E2641CA2B428 /* VirtualiCloudApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualiCloudApp.swift; sourceTree = "<group>"; };
 		24C0503017A60B71FBE40C54 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
@@ -42,6 +45,7 @@
 		6BDAB2CA400EADFFF319FC09 /* UNHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UNHelper.swift; sourceTree = "<group>"; };
 		819536AF59D8E1525F0E0370 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 		8C83739976105A1A6D45F700 /* ShellRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellRunner.swift; sourceTree = "<group>"; };
+		976A76B88BAE773D85D9BEC4 /* CredentialsDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsDialog.swift; sourceTree = "<group>"; };
 		977077BA44AE4974A6E81056 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		97B37496F4FA0EC926C54716 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		9D6BA459DAC86B810CBA2964 /* SetupHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupHelper.swift; sourceTree = "<group>"; };
@@ -105,6 +109,7 @@
 		229627FD1546BC0FB512760F /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				976A76B88BAE773D85D9BEC4 /* CredentialsDialog.swift */,
 				5CF01D4F0DEB8582683330A4 /* PairingsDialog.swift */,
 				B9CAEB41296A8E44242CF993 /* SettingsDialog.swift */,
 				9D6BA459DAC86B810CBA2964 /* SetupHelper.swift */,
@@ -167,6 +172,7 @@
 		F5185D2BD6D7A8D0F8CAE282 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				083E6DB373CB3D8C01D3F3B2 /* ICFolderHelper.swift */,
 				3B1DEB29C7FCC8AF8ED823F8 /* LaunchAtLogin.swift */,
 				8C83739976105A1A6D45F700 /* ShellRunner.swift */,
 				6BDAB2CA400EADFFF319FC09 /* UNHelper.swift */,
@@ -260,7 +266,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				49AAF948C026D7421E4E7F9F /* ConfigStore.swift in Sources */,
+				8F7451D8782C48D6B7B4DC43 /* CredentialsDialog.swift in Sources */,
 				20E20ECD5E61618DFCE43553 /* DaemonManager.swift in Sources */,
+				91A50D19CB2B349D807A6041 /* ICFolderHelper.swift in Sources */,
 				0ADF6E0AF20D2C10EC348C62 /* KeychainStore.swift in Sources */,
 				B73DA2356BEBA8EADD48B0F1 /* LaunchAtLogin.swift in Sources */,
 				B48248CF655B56B3C7A5845D /* Models.swift in Sources */,
@@ -367,7 +375,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.3.0;
+				MARKETING_VERSION = 0.3.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.icloud-sync.tray";
@@ -435,7 +443,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.3.0;
+				MARKETING_VERSION = 0.3.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

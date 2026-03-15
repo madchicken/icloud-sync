@@ -43,10 +43,23 @@ echo "Build succeeded."
 RESOURCES="$APP/Contents/Resources"
 VENV="$RESOURCES/venv"
 echo "Bundling Python venv..."
+rm -rf "$VENV"
 python3 -m venv "$VENV"
 "$VENV/bin/pip" install --quiet --upgrade pip
 "$VENV/bin/pip" install --quiet "$SCRIPT_DIR/.."
 echo "Bundled: $("$VENV/bin/icloud-sync" --help 2>&1 | head -1 || echo 'installed')"
+
+# Make venv portable: replace absolute symlinks with real binaries
+echo "Making venv portable..."
+REAL_PYTHON="$(readlink -f "$VENV/bin/python3")"
+rm -f "$VENV/bin/python3"
+cp "$REAL_PYTHON" "$VENV/bin/python3"
+# Point python → python3 as a relative symlink
+rm -f "$VENV/bin/python"
+ln -s python3 "$VENV/bin/python"
+# Remove version-specific and novelty symlinks that point outside the venv
+find "$VENV/bin" -name 'python3.*' -type l -delete
+find "$VENV/bin" -type l ! -exec test -e {} \; -delete
 
 # Sign venv Mach-O binaries before sealing the bundle
 echo "Pre-signing venv binaries..."

@@ -186,6 +186,113 @@ def cmd_status(args: list[str]) -> None:
         sys.exit(1)
 
 
+def cmd_verify(args: list[str]) -> None:
+    """
+    Verify iCloud credentials. Non-interactive — for use by the Swift UI.
+
+    Exit codes:
+      0 = success
+      1 = bad credentials or other error
+      2 = 2FA required (prints "2FA_REQUIRED" to stdout)
+
+    With --code CODE, validates 2FA and exits 0/1.
+
+    Usage: icloud-sync verify --username EMAIL [--code CODE]
+    """
+    import argparse
+    parser = argparse.ArgumentParser(prog="icloud-sync verify")
+    parser.add_argument("--username", required=True, help="Apple ID email")
+    parser.add_argument("--code", required=False, help="2FA code")
+    ns = parser.parse_args(args)
+
+    password = get_password(ns.username)
+    if not password:
+        print("NO_PASSWORD", flush=True)
+        sys.exit(1)
+
+    try:
+        from pyicloud import PyiCloudService
+        from pyicloud.exceptions import PyiCloudFailedLoginException
+        api = PyiCloudService(apple_id=ns.username, password=password)
+    except PyiCloudFailedLoginException as e:
+        print(f"LOGIN_FAILED:{e}", flush=True)
+        sys.exit(1)
+    except Exception as e:
+        print(f"ERROR:{e}", flush=True)
+        sys.exit(1)
+
+    if api.requires_2fa or api.requires_2sa:
+        if ns.code:
+            if api.requires_2fa:
+                if not api.validate_2fa_code(ns.code):
+                    print("INVALID_CODE", flush=True)
+                    sys.exit(1)
+            else:
+                devices = api.trusted_devices
+                if devices and api.send_verification_code(devices[0]):
+                    if not api.validate_verification_code(devices[0], ns.code):
+                        print("INVALID_CODE", flush=True)
+                        sys.exit(1)
+            if not api.is_trusted_session:
+                api.trust_session()
+            print("OK", flush=True)
+            sys.exit(0)
+        else:
+            print("2FA_REQUIRED", flush=True)
+            sys.exit(2)
+
+    if not api.is_trusted_session:
+        api.trust_session()
+    print("OK", flush=True)
+    sys.exit(0)
+
+
+def cmd_list_folders(args: list[str]) -> None:
+    """
+    List top-level iCloud Drive folders. Non-interactive — for use by the Swift UI.
+    Prints one folder name per line.
+
+    Usage: icloud-sync list-folders --username EMAIL
+    """
+    import argparse
+    parser = argparse.ArgumentParser(prog="icloud-sync list-folders")
+    parser.add_argument("--username", required=True, help="Apple ID email")
+    ns = parser.parse_args(args)
+
+    password = get_password(ns.username)
+    if not password:
+        print("ERROR: No password in keychain", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        api = interactive_authenticate(ns.username, password)
+        root = api.drive
+        for name in sorted(root.dir()):
+            print(name)
+    except Exception as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+def cmd_store_credentials(args: list[str]) -> None:
+    """
+    Save username to config.json (non-interactive, for use by the Swift UI).
+    Password is stored directly in Keychain by the Swift app.
+
+    Usage: icloud-sync store-credentials --username EMAIL
+    """
+    import argparse
+    parser = argparse.ArgumentParser(prog="icloud-sync store-credentials")
+    parser.add_argument("--username", required=True, help="Apple ID email")
+    ns = parser.parse_args(args)
+
+    saved = load_saved_config() or {}
+    pairs = saved.get("pairs", [])
+    poll_interval = saved.get("poll_interval", 60)
+    save_config(ns.username, pairs, poll_interval)
+    print(f"Username saved: {ns.username}")
+
+
 def cmd_start(args: list[str]) -> None:
     """Start the sync daemon (foreground). Reads config from environment variables."""
     from .sync_daemon import main
@@ -194,6 +301,9 @@ def cmd_start(args: list[str]) -> None:
 
 _COMMANDS = {
     "setup": cmd_setup,
+    "verify": cmd_verify,
+    "list-folders": cmd_list_folders,
+    "store-credentials": cmd_store_credentials,
     "add-pair": cmd_add_pair,
     "remove-pair": cmd_remove_pair,
     "status": cmd_status,

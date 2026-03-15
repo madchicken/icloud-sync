@@ -149,7 +149,7 @@ final class StatusBarController {
     }
 
     @objc private func openSetup() {
-        SetupHelper.openInTerminal()
+        CredentialsDialog.run()
     }
 
     @objc private func openSettings() {
