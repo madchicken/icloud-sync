@@ -7,12 +7,12 @@
       <sparkle:version>0.3.0</sparkle:version>
       <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-      <pubDate>Thu, 12 Mar 2026 14:32:52 +0000</pubDate>
+      <pubDate>Sun, 15 Mar 2026 18:36:19 +0000</pubDate>
       <enclosure
         url="https://github.com/madchicken/icloud-sync/releases/download/v0.3.0/iCloud Sync.dmg"
         type="application/octet-stream"
-        sparkle:edSignature="jpYWUTtNtPD17Xt2mVgWhTKEja5dMrWw6BatzHchAILuO6fHvs7J3AxMapUONUB9KbIvJO6HeuHNTKABc96zDA=="
-        length="30692855"
+        sparkle:edSignature="9qmfPZRvfA7RCrwqJVnx9hsIaBnFrjuzC3LrabVcRBbb4I1M/FQAhHUUuQHepBSFvIw07HcmCeM/awPLoGXKCg=="
+        length="32689995"
       />
     </item>
   </channel>
