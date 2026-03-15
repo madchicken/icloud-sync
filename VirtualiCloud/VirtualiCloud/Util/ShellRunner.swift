@@ -26,6 +26,36 @@ enum ShellRunner {
         }
     }
 
+    /// Resolve the icloud-sync CLI command.
+    /// Returns `[python3, script]` for the bundled venv, or `[path]` from PATH lookup.
+    static func icloudSyncCommand() -> [String]? {
+        if let resourcePath = Bundle.main.resourcePath {
+            let python = "\(resourcePath)/venv/bin/python3"
+            let script = "\(resourcePath)/venv/bin/icloud-sync"
+            if FileManager.default.isExecutableFile(atPath: python)
+                && FileManager.default.fileExists(atPath: script)
+            {
+                return [python, script]
+            }
+        }
+        // PATH fallback
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/which")
+        task.arguments = ["icloud-sync"]
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = FileHandle.nullDevice
+        do {
+            try task.run()
+            task.waitUntilExit()
+            let output = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            return output.isEmpty ? nil : [output]
+        } catch {
+            return nil
+        }
+    }
+
     /// Run an AppleScript string via osascript.
     static func appleScript(_ source: String) {
         var error: NSDictionary?

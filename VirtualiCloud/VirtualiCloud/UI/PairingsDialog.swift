@@ -59,8 +59,12 @@ enum PairingsDialog {
         guard let remote = remoteDir, !remote.trimmingCharacters(in: .whitespaces).isEmpty else { return }
 
         // Shell out to the CLI to mutate config (Python is the single config writer)
+        guard let cmd = ShellRunner.icloudSyncCommand() else {
+            showDialog("Cannot find icloud-sync CLI.", buttons: ["OK"], title: "iCloud Sync", defaultButton: "OK")
+            return
+        }
         do {
-            try ShellRunner.run(["icloud-sync", "add-pair", "--local", localPath, "--remote", remote.trimmingCharacters(in: .whitespaces)])
+            try ShellRunner.run(cmd + ["add-pair", "--local", localPath, "--remote", remote.trimmingCharacters(in: .whitespaces)])
             UNHelper.post(title: "iCloud Sync", body: "Pair added: \(localURL.lastPathComponent) ↔ \(remote)")
         } catch {
             showDialog("Error adding pair:\n\(error.localizedDescription)", buttons: ["OK"], title: "iCloud Sync", defaultButton: "OK")
@@ -93,8 +97,12 @@ enum PairingsDialog {
         )
         guard confirmed == "Remove" else { return }
 
+        guard let rcmd = ShellRunner.icloudSyncCommand() else {
+            showDialog("Cannot find icloud-sync CLI.", buttons: ["OK"], title: "iCloud Sync", defaultButton: "OK")
+            return
+        }
         do {
-            try ShellRunner.run(["icloud-sync", "remove-pair", "--remote", selected.remoteDir])
+            try ShellRunner.run(rcmd + ["remove-pair", "--remote", selected.remoteDir])
             UNHelper.post(title: "iCloud Sync", body: "Removed: \(selected.localURL.lastPathComponent) ↔ \(selected.remoteDir)")
         } catch {
             showDialog("Error removing pair:\n\(error.localizedDescription)", buttons: ["OK"], title: "iCloud Sync", defaultButton: "OK")
