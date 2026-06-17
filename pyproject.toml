@@ -6,6 +6,12 @@ dependencies = [
     "pyicloud @ git+https://github.com/timlaing/pyicloud.git",
     "watchdog>=4.0",
     "keyring>=25.0",
+    "send2trash>=1.8",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
 ]
 
 [tool.setuptools.packages.find]

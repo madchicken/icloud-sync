@@ -37,29 +37,41 @@ if ! grep -q "BUILD SUCCEEDED" /tmp/xcodebuild.log; then
 fi
 echo "Build succeeded."
 
-# Bundle Python venv
-# Install the Python daemon inside the .app so it works on any Mac
-# without requiring a separate pip install.
+# Bundle a self-contained, relocatable Python (python-build-standalone via uv).
+# Unlike a `python -m venv` off Homebrew/system Python, this interpreter links
+# its libpython with an @executable_path-relative rpath, so it keeps working
+# wherever the .app lands and survives `brew upgrade python@3.14`.
 RESOURCES="$APP/Contents/Resources"
 VENV="$RESOURCES/venv"
-echo "Bundling Python venv..."
-rm -rf "$VENV"
-python3 -m venv "$VENV"
-"$VENV/bin/pip" install --quiet --upgrade pip
-"$VENV/bin/pip" install --quiet "$SCRIPT_DIR/.."
-echo "Bundled: $("$VENV/bin/icloud-sync" --help 2>&1 | head -1 || echo 'installed')"
+PYVER=3.14
+echo "Bundling standalone Python $PYVER..."
 
-# Make venv portable: replace absolute symlinks with real binaries
-echo "Making venv portable..."
-REAL_PYTHON="$(readlink -f "$VENV/bin/python3")"
-rm -f "$VENV/bin/python3"
-cp "$REAL_PYTHON" "$VENV/bin/python3"
-# Point python → python3 as a relative symlink
-rm -f "$VENV/bin/python"
-ln -s python3 "$VENV/bin/python"
-# Remove version-specific and novelty symlinks that point outside the venv
-find "$VENV/bin" -name 'python3.*' -type l -delete
-find "$VENV/bin" -type l ! -exec test -e {} \; -delete
+command -v uv >/dev/null || { echo "uv is required to build (https://docs.astral.sh/uv/)"; exit 1; }
+uv python install "$PYVER"
+# Copy the whole standalone install into the bundle. Use the canonical prefix
+# (sys.prefix, e.g. cpython-3.14.3-...) — NOT the `cpython-3.14-...` alias dir,
+# which is a symlink whose copy resolves its prefix back to the original. The
+# canonical copy resolves its prefix to itself relative to the executable, so it
+# works on the build machine AND on the user's Mac (where ~/.local/share/uv is
+# absent), surviving `brew upgrade`.
+STD_PY="$(UV_PYTHON_PREFERENCE=only-managed uv python find "$PYVER")"
+STANDALONE_PREFIX="$("$STD_PY" -c 'import sys; print(sys.prefix)')"
+
+rm -rf "$VENV"
+cp -R "$STANDALONE_PREFIX" "$VENV"
+
+# Install the daemon INTO the copy. `--prefix "$VENV"` pins the install location
+# to the bundle (deterministic regardless of prefix resolution). `--break-system-
+# packages` lifts the PEP-668 guard uv stamps on managed interpreters — this is
+# our private copy, so modifying it is intended. DaemonManager runs
+# `python3 <script> start`, so the script's absolute shebang is never used —
+# only the installed module on sys.path matters.
+echo "Installing daemon into bundled Python..."
+"$VENV/bin/python3" -m pip install --quiet --break-system-packages --prefix "$VENV" "$SCRIPT_DIR/.."
+"$VENV/bin/python3" -c "import icloud_sync, pyicloud" \
+  && [ -f "$VENV/bin/icloud-sync" ] \
+  || { echo "Bundled Python is broken or daemon not installed"; exit 1; }
+echo "Bundled: standalone Python $("$VENV/bin/python3" -c 'import sys; print(sys.version.split()[0])') + icloud-sync"
 
 # Sign venv Mach-O binaries before sealing the bundle
 echo "Pre-signing venv binaries..."
@@ -71,9 +83,13 @@ done < <(find "$VENV/bin" -type f)
 find "$VENV" \( -name "*.so" -o -name "*.dylib" \) \
   -exec codesign --force --sign - {} \; 2>/dev/null || true
 
-# Sign the whole bundle
+# Sign the whole bundle. --deep is required: the bundle now contains a large
+# nested Python tree (interpreter + hundreds of .so/.dylib). Without it the
+# outer seal doesn't cover the nested code and `codesign -v` reports
+# "a sealed resource is missing or invalid", which Gatekeeper rejects.
 echo "Signing..."
-codesign --force --sign - "$APP"
+codesign --force --deep --sign - "$APP"
+codesign --verify --strict "$APP" || { echo "Code signature invalid"; exit 1; }
 
 # DMG
 echo "Creating DMG..."

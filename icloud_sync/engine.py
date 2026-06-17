@@ -19,6 +19,7 @@ from shutil import copyfileobj
 from typing import Optional
 
 from pyicloud.exceptions import PyiCloudAPIResponseException
+from send2trash import send2trash
 
 from .state import FileStatus, Index, IndexEntry, save
 
@@ -27,6 +28,14 @@ logger = logging.getLogger(__name__)
 # Remote mtimes can drift from local by a few seconds due to upload latency
 # and server-side rounding. Changes smaller than this are ignored.
 _MTIME_TOLERANCE = 5.0
+
+
+class RemoteListingError(Exception):
+    """Raised when the remote drive cannot be listed.
+
+    Reconcile MUST treat this as "unknown remote state" and abort the cycle —
+    never as "the server is empty", which would delete every local file.
+    """
 
 
 # ---------------------------------------------------------------------------
@@ -91,8 +100,10 @@ def walk_remote(
     try:
         children = node.get_children(force=True)
     except Exception as e:
-        logger.warning("Could not list remote dir '%s': %s", prefix or "/", e)
-        return result
+        # Do NOT swallow this. A partial/empty listing would make reconcile
+        # think every indexed file was deleted on the server and wipe the
+        # local copies. Propagate so the caller can abort the whole cycle.
+        raise RemoteListingError(f"could not list remote dir '{prefix or '/'}': {e}") from e
 
     for child in children:
         if not _is_active(child):
@@ -281,10 +292,12 @@ def delete_remote(drive_root, rel: str) -> bool:
 
 
 def delete_local(local_base: Path, rel: str) -> bool:
+    # Route through the Trash rather than unlink()/rmtree() so a wrong
+    # deletion decision is recoverable. Never permanently destroy user data.
     path = local_base / rel
     try:
-        shutil.rmtree(path) if path.is_dir() else path.unlink()
-        logger.info("Deleted local: %s", rel)
+        send2trash(str(path))
+        logger.info("Moved local to Trash: %s", rel)
         return True
     except Exception as e:
         logger.error("Delete local failed for %s: %s", rel, e)
@@ -503,8 +516,29 @@ def reconcile(
 
     # 2. Scan current state
     local_now = walk_local(local_dir, exclude_patterns)
-    remote_now = walk_remote(drive_root, patterns=exclude_patterns)
+    try:
+        remote_now = walk_remote(drive_root, patterns=exclude_patterns)
+    except RemoteListingError as e:
+        # Unknown remote state — refuse to infer deletions. Leave the index
+        # untouched and retry on the next poll.
+        logger.error("Aborting cycle: %s — refusing to infer deletions", e)
+        return index
     _log_remote_listing(remote_now)
+
+    # Safety guard: an empty remote listing while the index still tracks files
+    # almost always means a transient failure or a wrong remote folder — not
+    # that the user emptied iCloud. Propagating it would delete every local
+    # file. Abort and require an explicit resync (delete the index) instead.
+    remote_file_count = sum(1 for s in remote_now.values() if not s.is_dir)
+    indexed_file_count = sum(1 for e in index.values() if not e.is_dir)
+    if remote_file_count == 0 and indexed_file_count > 0:
+        logger.error(
+            "Aborting cycle: remote listing is empty but the index tracks %d "
+            "file(s). Refusing to delete local files. If you really emptied the "
+            "remote folder, delete %s to force a resync.",
+            indexed_file_count, index_path,
+        )
+        return index
 
     # 3. Detect local modifications that the watcher may have missed
     #    (e.g. files changed while the daemon was stopped)
