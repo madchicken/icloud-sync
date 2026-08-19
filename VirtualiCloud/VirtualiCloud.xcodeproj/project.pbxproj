@@ -15,6 +15,7 @@
 		4409C11622D36C207974AE4C /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 02E95E4E04F32F249C0B54C6 /* Sparkle */; };
 		49AAF948C026D7421E4E7F9F /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24C0503017A60B71FBE40C54 /* ConfigStore.swift */; };
 		4E2EE3DA9BFFE3837D7CBC5C /* SettingsDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CAEB41296A8E44242CF993 /* SettingsDialog.swift */; };
+		59D777051D0561EA0FBCC97B /* TwoFactorWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091383CA23DD086A04FC4BB1 /* TwoFactorWatcher.swift */; };
 		693C4A91C6FE95408093DDFE /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A44EC53DF030259C4F93A238 /* AppIcon.icns */; };
 		6AF108846F99B4CA1274F3B5 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819536AF59D8E1525F0E0370 /* StatusBarController.swift */; };
 		747B7C399058C1CB15EA1541 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5EEAEC833EBD8C4D70698887 /* UserNotifications.framework */; };
@@ -33,6 +34,7 @@
 
 /* Begin PBXFileReference section */
 		083E6DB373CB3D8C01D3F3B2 /* ICFolderHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICFolderHelper.swift; sourceTree = "<group>"; };
+		091383CA23DD086A04FC4BB1 /* TwoFactorWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoFactorWatcher.swift; sourceTree = "<group>"; };
 		0D8250366D9155AC6F746866 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		221BDE24FF73E2641CA2B428 /* VirtualiCloudApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualiCloudApp.swift; sourceTree = "<group>"; };
 		24C0503017A60B71FBE40C54 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
@@ -113,6 +115,7 @@
 				5CF01D4F0DEB8582683330A4 /* PairingsDialog.swift */,
 				B9CAEB41296A8E44242CF993 /* SettingsDialog.swift */,
 				9D6BA459DAC86B810CBA2964 /* SetupHelper.swift */,
+				091383CA23DD086A04FC4BB1 /* TwoFactorWatcher.swift */,
 				61197DD54701B7AE801AEAAA /* UninstallHelper.swift */,
 			);
 			path = UI;
@@ -278,6 +281,7 @@
 				BF704475558DA7C031A445FB /* SetupHelper.swift in Sources */,
 				04CB0823F510BBF6922997CC /* ShellRunner.swift in Sources */,
 				6AF108846F99B4CA1274F3B5 /* StatusBarController.swift in Sources */,
+				59D777051D0561EA0FBCC97B /* TwoFactorWatcher.swift in Sources */,
 				384DF7CA9A1EAFCDA088798E /* UNHelper.swift in Sources */,
 				3300A9133F327EF682F9D97B /* UninstallHelper.swift in Sources */,
 				9954CB5AAD006119D74C6A70 /* VirtualiCloudApp.swift in Sources */,
@@ -375,7 +379,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.3.1;
+				MARKETING_VERSION = 0.4.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.icloud-sync.tray";
@@ -443,7 +447,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.3.1;
+				MARKETING_VERSION = 0.4.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

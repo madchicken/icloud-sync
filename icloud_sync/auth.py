@@ -1,5 +1,7 @@
 import getpass
+import json
 import logging
+import os
 import subprocess
 import sys
 import time
@@ -14,6 +16,15 @@ logger = logging.getLogger(__name__)
 
 # Same service name as pyicloud so credentials are cross-compatible
 _KEYRING_SERVICE = "pyicloud://icloud-password"
+
+# The daemon has no UI. When it needs a 2FA/2SA code it publishes a request
+# marker and blocks until the code appears in _CODE_PATH. The menu bar app
+# watches for the marker (see UI/TwoFactorWatcher.swift), prompts the user, and
+# writes the code back.
+_REQUEST_PATH = Path.home() / ".icloud_sync_2fa_request"
+_CODE_PATH = Path.home() / ".icloud_sync_2fa_code"
+_CODE_WAIT_TIMEOUT = 600  # seconds — generous, the prompt is user-driven
+_CODE_POLL_INTERVAL = 2
 
 
 # ---------------------------------------------------------------------------
@@ -105,7 +116,7 @@ def _handle_2fa_daemon(api: PyiCloudService) -> None:
         )
         sys.exit(1)
 
-    code = _wait_for_code_file()
+    code = _wait_for_code_file("2fa")
     if not api.validate_2fa_code(code):
         logger.error("2FA code validation failed")
         sys.exit(1)
@@ -126,29 +137,74 @@ def _handle_2sa_daemon(api: PyiCloudService) -> None:
         logger.error("Failed to send verification code")
         sys.exit(1)
 
-    code = _wait_for_code_file()
+    code = _wait_for_code_file("2sa")
     if not api.validate_verification_code(device, code):
         logger.error("2SA code validation failed")
         sys.exit(1)
     logger.info("2SA validated")
 
 
-def _wait_for_code_file() -> str:
-    """Wait for user to write a 2FA code to ~/.icloud_sync_2fa_code."""
-    code_path = Path.home() / ".icloud_sync_2fa_code"
-    code_path.unlink(missing_ok=True)
+def _publish_code_request(kind: str) -> None:
+    """
+    Announce that we are blocked waiting for a verification code.
 
-    notify("iCloud Sync", f"Enter your 2FA code: echo CODE > {code_path}")
-    logger.info("Waiting for 2FA code at %s", code_path)
+    The menu bar app polls for this marker and prompts the user. The pid and
+    start time let it ignore markers left behind by a daemon that has already
+    died or timed out.
+    """
+    payload = json.dumps(
+        {
+            "kind": kind,
+            "pid": os.getpid(),
+            "started": time.time(),
+            "timeout": _CODE_WAIT_TIMEOUT,
+        }
+    )
+    tmp = _REQUEST_PATH.with_name(_REQUEST_PATH.name + ".tmp")
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(payload)
+    os.replace(tmp, _REQUEST_PATH)
 
-    for _ in range(150):  # 5 minutes
-        if code_path.exists():
-            code = code_path.read_text().strip()
-            code_path.unlink(missing_ok=True)
-            return code
-        time.sleep(2)
 
-    logger.error("Timed out waiting for 2FA code")
+def _wait_for_code_file(kind: str = "2fa") -> str:
+    """
+    Wait for a verification code to appear at ~/.icloud_sync_2fa_code.
+
+    Normally the menu bar app writes it after prompting the user; it can also be
+    supplied by hand with `echo CODE > ~/.icloud_sync_2fa_code`.
+    """
+    _CODE_PATH.unlink(missing_ok=True)
+
+    try:
+        _publish_code_request(kind)
+    except OSError as e:
+        # Without the marker the app cannot prompt, but a hand-written code
+        # still works — carry on rather than failing the login outright.
+        logger.warning("Could not publish %s code request: %s", kind, e)
+
+    notify("iCloud Sync", "Verification code required — check your Apple devices")
+    logger.info(
+        "Waiting up to %d minutes for %s code at %s",
+        _CODE_WAIT_TIMEOUT // 60,
+        kind,
+        _CODE_PATH,
+    )
+
+    deadline = time.monotonic() + _CODE_WAIT_TIMEOUT
+    try:
+        while time.monotonic() < deadline:
+            if _CODE_PATH.exists():
+                code = _CODE_PATH.read_text().strip()
+                _CODE_PATH.unlink(missing_ok=True)
+                if code:
+                    return code
+                logger.warning("Ignoring empty code file at %s", _CODE_PATH)
+            time.sleep(_CODE_POLL_INTERVAL)
+    finally:
+        _REQUEST_PATH.unlink(missing_ok=True)
+
+    logger.error("Timed out waiting for %s code", kind)
     sys.exit(1)
 
 
