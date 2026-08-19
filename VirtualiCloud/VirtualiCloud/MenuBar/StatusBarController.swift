@@ -4,6 +4,7 @@ import Sparkle
 final class StatusBarController {
 
     let daemonManager = DaemonManager()
+    let twoFactorWatcher = TwoFactorWatcher()
 
     private let statusItem: NSStatusItem
     private let updaterController: SPUStandardUpdaterController
@@ -14,6 +15,7 @@ final class StatusBarController {
     private var toggleMenuItem  = NSMenuItem()
     private var pairsSubmenu    = NSMenu()
     private var pairsMenuItem   = NSMenuItem()
+    private var verifyMenuItem  = NSMenuItem()
 
     init(updaterController: SPUStandardUpdaterController) {
         self.updaterController = updaterController
@@ -69,6 +71,17 @@ final class StatusBarController {
 
         menu.addItem(.separator())
 
+        // Shown only while the daemon is blocked waiting for a code — the way
+        // back in if the automatic prompt was cancelled or answered wrongly.
+        verifyMenuItem = NSMenuItem(
+            title: "Enter Verification Code…",
+            action: #selector(enterVerificationCode),
+            keyEquivalent: ""
+        )
+        verifyMenuItem.target = self
+        verifyMenuItem.isHidden = true
+        menu.addItem(verifyMenuItem)
+
         let setupItem = NSMenuItem(title: "Setup / Credentials…", action: #selector(openSetup), keyEquivalent: "")
         setupItem.target = self
         menu.addItem(setupItem)
@@ -107,8 +120,11 @@ final class StatusBarController {
 
     func refresh() {
         let running = daemonManager.isRunning()
-        statusMenuItem.title = running ? "●  Running" : "○  Stopped"
+        let awaitingCode = twoFactorWatcher.hasPendingRequest
+        statusMenuItem.title = awaitingCode ? "!  Verification required"
+                                            : (running ? "●  Running" : "○  Stopped")
         toggleMenuItem.title = running ? "■  Stop"    : "▶  Start"
+        verifyMenuItem.isHidden = !awaitingCode
     }
 
     private func rebuildPairsSubmenu() {
@@ -146,6 +162,11 @@ final class StatusBarController {
         PairingsDialog.run()
         rebuildPairsSubmenu()
         daemonManager.reload()
+    }
+
+    @objc private func enterVerificationCode() {
+        twoFactorWatcher.promptNow()
+        refresh()
     }
 
     @objc private func openSetup() {

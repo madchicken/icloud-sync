@@ -26,7 +26,14 @@ final class TwoFactorWatcher {
 
     private var timer: Timer?
     private var isPrompting = false
-    private var handled = Set<String>()
+
+    /// Requests we have already put a dialog up for. Prevents the 2 s poll from
+    /// reopening the alert; the menu item is the way back in after a cancel.
+    private var autoPrompted = Set<String>()
+
+    /// True while a daemon is actually blocked waiting for a code, so the menu
+    /// can offer a second attempt after a cancelled or mistyped prompt.
+    var hasPendingRequest: Bool { liveRequest() != nil }
 
     // MARK: — Lifecycle
 
@@ -46,26 +53,41 @@ final class TwoFactorWatcher {
     // MARK: — Polling
 
     private func check() {
-        guard !isPrompting, let request = readRequest() else { return }
-        guard !handled.contains(request.identity) else { return }
+        guard !isPrompting, let request = liveRequest() else { return }
+        guard !autoPrompted.contains(request.identity) else { return }
 
-        // Ignore a marker whose daemon is gone, or that has already timed out —
-        // Apple's code is long dead and prompting would only confuse.
-        guard kill(request.pid, 0) == 0 else {
-            try? FileManager.default.removeItem(at: Self.requestURL)
-            return
-        }
-        guard Date().timeIntervalSince(request.started) < request.timeout else { return }
-
-        handled.insert(request.identity)
-        isPrompting = true
-        defer { isPrompting = false }
-
+        autoPrompted.insert(request.identity)
         UNHelper.post(
             title: "iCloud Sync",
             body: "Verification required — enter the code Apple sent to your devices."
         )
+        runPrompt(for: request)
+    }
+
+    /// Prompt on demand, from the menu. Used when the automatic prompt was
+    /// cancelled or answered wrongly and the daemon is still waiting.
+    func promptNow() {
+        guard !isPrompting, let request = liveRequest() else { return }
+        runPrompt(for: request)
+    }
+
+    private func runPrompt(for request: Request) {
+        isPrompting = true
+        defer { isPrompting = false }
         prompt(for: request)
+    }
+
+    /// A request whose daemon is still alive and still within its wait window.
+    /// A marker orphaned by a dead daemon is cleaned up; one that has timed out
+    /// is ignored, since Apple's code is long dead by then.
+    private func liveRequest() -> Request? {
+        guard let request = readRequest() else { return nil }
+        guard kill(request.pid, 0) == 0 else {
+            try? FileManager.default.removeItem(at: Self.requestURL)
+            return nil
+        }
+        guard Date().timeIntervalSince(request.started) < request.timeout else { return nil }
+        return request
     }
 
     private func readRequest() -> Request? {
@@ -110,7 +132,13 @@ final class TwoFactorWatcher {
             }
         }
 
-        guard let code, !code.isEmpty else { return }
+        guard let code, !code.isEmpty else {
+            UNHelper.post(
+                title: "iCloud Sync",
+                body: "Syncing stays paused — use “Enter Verification Code…” in the menu bar to try again."
+            )
+            return
+        }
 
         do {
             try writeCode(code)

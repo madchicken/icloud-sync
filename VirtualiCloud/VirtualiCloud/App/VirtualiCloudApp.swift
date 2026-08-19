@@ -6,7 +6,6 @@ import Sparkle
 final class AppMain: NSObject, NSApplicationDelegate {
 
     private var statusBarController: StatusBarController?
-    private let twoFactorWatcher = TwoFactorWatcher()
     let updaterController: SPUStandardUpdaterController
 
     override init() {
@@ -27,7 +26,7 @@ final class AppMain: NSObject, NSApplicationDelegate {
 
         // Watch for the daemon asking for a verification code. Started before
         // the daemon, and unconditionally, since launchd may also have spawned one.
-        twoFactorWatcher.start()
+        statusBarController?.twoFactorWatcher.start()
 
         // Auto-start daemon if the preference is set
         if PrefsStore.load().autostartDaemon == true {
@@ -36,7 +35,7 @@ final class AppMain: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        twoFactorWatcher.stop()
+        statusBarController?.twoFactorWatcher.stop()
         // Only stop the daemon if we spawned it in this session
         statusBarController?.daemonManager.stopIfOwned()
     }
