@@ -87,6 +87,24 @@ def authenticate(username: str, session_refresh_interval: int = 300) -> PyiCloud
         notify("iCloud Sync", "Login failed — run: icloud-sync setup")
         sys.exit(1)
 
+    # pyicloud reports requires_2fa whenever the session is untrusted, including
+    # when a stored session token still validates. On that path it never performs
+    # a fresh login, so Apple issues no challenge and sends no code — prompting
+    # would ask for a code that cannot exist. Trusting the session clears the
+    # requirement outright; only a live challenge earns a prompt.
+    if (api.requires_2fa or api.requires_2sa) and not _has_pending_challenge(api):
+        logger.info("2FA flagged with no code in flight — trusting session instead")
+        if api.trust_session():
+            logger.info("Session trusted; no verification code needed")
+        else:
+            logger.info("Session could not be trusted — asking Apple for a code")
+            try:
+                api.authenticate(force_refresh=True)
+            except PyiCloudFailedLoginException as e:
+                logger.error("Re-authentication failed: %s", e)
+                notify("iCloud Sync", "Login failed — run: icloud-sync setup")
+                sys.exit(1)
+
     if api.requires_2fa:
         _handle_2fa_daemon(api)
     elif api.requires_2sa:
@@ -99,6 +117,18 @@ def authenticate(username: str, session_refresh_interval: int = 300) -> PyiCloud
 
     logger.info("Authentication successful")
     return api
+
+
+def _has_pending_challenge(api: PyiCloudService) -> bool:
+    """
+    True when Apple has actually issued a verification challenge.
+
+    pyicloud fills _auth_data only when a fresh password login is answered with
+    "2FA required", and that same exchange is what makes Apple send the code. So
+    an empty _auth_data means no code is in flight and there is nothing for the
+    user to type. pyicloud exposes no public accessor for this.
+    """
+    return bool(getattr(api, "_auth_data", None))
 
 
 # ---------------------------------------------------------------------------
