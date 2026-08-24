@@ -15,6 +15,17 @@ final class StatusBarController {
     private var pairsSubmenu    = NSMenu()
     private var pairsMenuItem   = NSMenuItem()
 
+    // Sync-activity icon animation (mela che si riempie durante le copie)
+    private var baseIcon: NSImage?
+    private var activityFrames: [NSImage] = []
+    private var activityPollTimer: Timer?
+    private var animationTimer: Timer?
+    private var isAnimatingActivity = false
+    private var frameIndex = 0
+    private var frameDirection = 1
+    private let activityFrameCount = 8
+    private let activityStaleness: TimeInterval = 2.0
+
     init(updaterController: SPUStandardUpdaterController) {
         self.updaterController = updaterController
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -23,6 +34,9 @@ final class StatusBarController {
         refresh()
         refreshTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
             self?.refresh()
+        }
+        activityPollTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            self?.checkActivity()
         }
     }
 
@@ -33,10 +47,79 @@ final class StatusBarController {
             // Use the template image from the bundle, fall back to text
             if let img = NSImage(named: "menubarTemplate") {
                 img.isTemplate = true
+                baseIcon = img
                 button.image = img
+                activityFrames = (0...activityFrameCount).map {
+                    makeActivityFrame(fillFraction: CGFloat($0) / CGFloat(activityFrameCount), from: img)
+                }
             } else {
                 button.title = "☁"
             }
+        }
+    }
+
+    /// Renders the base icon with everything above `fillFraction` dimmed, so cycling
+    /// through fractions 0→1→0 while a copy is in progress looks like the icon filling
+    /// up from the bottom and draining again.
+    private func makeActivityFrame(fillFraction: CGFloat, from base: NSImage, dimAlpha: CGFloat = 0.18) -> NSImage {
+        let size = base.size
+        let frame = NSImage(size: size)
+        frame.isTemplate = true
+        frame.lockFocus()
+        base.draw(in: NSRect(origin: .zero, size: size), from: .zero, operation: .sourceOver, fraction: dimAlpha)
+        if fillFraction > 0 {
+            NSGraphicsContext.current?.saveGraphicsState()
+            NSRect(x: 0, y: 0, width: size.width, height: size.height * fillFraction).clip()
+            base.draw(in: NSRect(origin: .zero, size: size), from: .zero, operation: .sourceOver, fraction: 1.0)
+            NSGraphicsContext.current?.restoreGraphicsState()
+        }
+        frame.unlockFocus()
+        return frame
+    }
+
+    // MARK: — Sync-activity animation
+
+    /// Polled every second: turns the fill animation on/off based on the daemon's
+    /// activity heartbeat (~/.config/icloud_sync/activity.json), written from
+    /// download()/upload() while a copy is actually happening.
+    private func checkActivity() {
+        let stale = ConfigStore.lastActivityDate()
+            .map { Date().timeIntervalSince($0) > activityStaleness } ?? true
+        if stale && isAnimatingActivity {
+            stopActivityAnimation()
+        } else if !stale && !isAnimatingActivity {
+            startActivityAnimation()
+        }
+    }
+
+    private func startActivityAnimation() {
+        guard !activityFrames.isEmpty else { return }
+        isAnimatingActivity = true
+        frameIndex = 0
+        frameDirection = 1
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 0.12, repeats: true) { [weak self] _ in
+            self?.advanceActivityFrame()
+        }
+    }
+
+    private func stopActivityAnimation() {
+        isAnimatingActivity = false
+        animationTimer?.invalidate()
+        animationTimer = nil
+        statusItem.button?.image = baseIcon
+    }
+
+    private func advanceActivityFrame() {
+        statusItem.button?.image = activityFrames[frameIndex]
+        let next = frameIndex + frameDirection
+        if next >= activityFrames.count {
+            frameDirection = -1
+            frameIndex = activityFrames.count - 2
+        } else if next < 0 {
+            frameDirection = 1
+            frameIndex = 1
+        } else {
+            frameIndex = next
         }
     }
 

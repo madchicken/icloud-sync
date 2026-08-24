@@ -21,6 +21,7 @@ from typing import Optional
 from pyicloud.exceptions import PyiCloudAPIResponseException
 from send2trash import send2trash
 
+from . import activity
 from .state import FileStatus, Index, IndexEntry, save
 
 logger = logging.getLogger(__name__)
@@ -218,6 +219,7 @@ def download(
     drive_root, rel: str, local_base: Path, suppress_fn=None
 ) -> Optional[IndexEntry]:
     """Download file and return an updated IndexEntry, or None on failure."""
+    activity.mark_active()
     local_path = local_base / rel
     local_path.parent.mkdir(parents=True, exist_ok=True)
     # Suppress watcher events BEFORE writing so the daemon doesn't re-upload
@@ -256,6 +258,7 @@ def download(
 
 def upload(drive_root, rel: str, local_base: Path) -> Optional[IndexEntry]:
     """Upload file and return an updated IndexEntry, or None on failure."""
+    activity.mark_active()
     local_path = local_base / rel
     try:
         parent_rel = "/".join(rel.split("/")[:-1])
