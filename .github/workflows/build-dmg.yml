@@ -24,8 +24,8 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION"
 
-      - name: Install xcodegen
-        run: brew install xcodegen
+      - name: Install xcodegen and uv
+        run: brew install xcodegen uv
 
       - name: Generate Xcode project
         run: xcodegen generate --spec VirtualiCloud/project.yml
