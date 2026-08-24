@@ -13,7 +13,7 @@ packages:
 settings:
   base:
     PRODUCT_BUNDLE_IDENTIFIER: com.icloud-sync.tray
-    MARKETING_VERSION: "0.4.1"
+    MARKETING_VERSION: "0.4.2"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "13.0"
@@ -32,6 +32,8 @@ targets:
     info:
       path: VirtualiCloud/Info.plist
       properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         LSUIElement: true
         NSUserNotificationAlertStyle: alert
         NSPrincipalClass: NSApplication
