@@ -3,16 +3,16 @@
   <channel>
     <title>iCloud Sync</title>
     <item>
-      <title>Version 0.4.1</title>
-      <sparkle:version>0.4.1</sparkle:version>
-      <sparkle:shortVersionString>0.4.1</sparkle:shortVersionString>
+      <title>Version 0.4.2</title>
+      <sparkle:version>0.4.2</sparkle:version>
+      <sparkle:shortVersionString>0.4.2</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-      <pubDate>Mon, 24 Aug 2026 13:55:33 +0000</pubDate>
+      <pubDate>Mon, 24 Aug 2026 14:09:29 +0000</pubDate>
       <enclosure
-        url="https://github.com/madchicken/icloud-sync/releases/download/v0.4.1/iCloud Sync.dmg"
+        url="https://github.com/madchicken/icloud-sync/releases/download/v0.4.2/iCloud Sync.dmg"
         type="application/octet-stream"
-        sparkle:edSignature="kuvLMIfYREZB35JIF/lmM+v1fMLUTFiqCJLuQXSCFQTZeWxh4CxtLtwPcRaZJZ4394UFXxwsE/SuuHi/B21hCg=="
-        length="98403712"
+        sparkle:edSignature="aHNk/KvC9sUuart6CE7HF2FGERvCWk0rh7aOuOMw3TS+CACXXR3shoQXTjJ2V/MxXX0LqG/W3La6TLueJ2TYDA=="
+        length="95580204"
       />
     </item>
   </channel>
