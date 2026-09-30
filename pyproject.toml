@@ -1,6 +1,6 @@
 [project]
 name = "virtualicloud"
-version = "0.4.2"
+version = "0.4.3"
 requires-python = ">=3.11"
 dependencies = [
     # 2.7.0 is the first release whose 2FA flow requests ONE code via Apple's
