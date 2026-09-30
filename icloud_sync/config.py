@@ -7,6 +7,11 @@ from typing import Optional
 _CONFIG_FILE = Path.home() / ".config" / "icloud_sync" / "config.json"
 _PID_FILE = Path.home() / ".config" / "icloud_sync" / "daemon.pid"
 
+# Where pyicloud keeps its cookies + session/trust tokens. pyicloud's default is
+# $TMPDIR, which macOS wipes on reboot and every few days — losing the trust
+# token there is what makes iCloud ask for a 2FA code at every daemon start.
+SESSION_DIR = Path.home() / ".config" / "icloud_sync" / "session"
+
 
 # ---------------------------------------------------------------------------
 # PID file helpers (used by daemon and tray app)

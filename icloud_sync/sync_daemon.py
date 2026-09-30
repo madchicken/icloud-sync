@@ -17,6 +17,7 @@ import sys
 import time
 from pathlib import Path
 
+from . import twofa
 from .auth import authenticate, notify
 from .config import SyncPair, clear_pid, load_config, write_pid
 from .engine import bootstrap, reconcile
@@ -42,6 +43,7 @@ def _handle_signal(signum, frame):
     else:
         logger.info("Signal %d received — shutting down", signum)
         _running = False
+        twofa.cancel()  # unblock a pending 2FA wait so we exit promptly
 
 
 def _get_drive_root(api, remote_dir: str):

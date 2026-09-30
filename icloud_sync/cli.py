@@ -16,7 +16,7 @@ from .auth import (
     interactive_authenticate,
     store_password,
 )
-from .config import add_pair, load_saved_config, remove_pair, save_config
+from .config import SESSION_DIR, add_pair, load_saved_config, remove_pair, save_config
 
 
 def _prompt_password(username: str) -> str:
@@ -213,7 +213,9 @@ def cmd_verify(args: list[str]) -> None:
     try:
         from pyicloud import PyiCloudService
         from pyicloud.exceptions import PyiCloudFailedLoginException
-        api = PyiCloudService(apple_id=ns.username, password=password)
+        api = PyiCloudService(
+            apple_id=ns.username, password=password, cookie_directory=str(SESSION_DIR)
+        )
     except PyiCloudFailedLoginException as e:
         print(f"LOGIN_FAILED:{e}", flush=True)
         sys.exit(1)

@@ -21,6 +21,7 @@ ICLOUD_USERNAME=you@icloud.com ICLOUD_LOCAL_DIR=~/Documents/iCloudSync .venv/bin
 ## Key gotchas
 - iCloud Drive has no push API — sync is poll-based (default 60s interval)
 - `drive_file.date_modified` is UTC naive datetime; convert with `replace(tzinfo=timezone.utc)`
-- 2FA in daemon mode: daemon waits for `echo CODE > ~/.icloud_sync_2fa_code`
+- 2FA in daemon mode: daemon writes `~/.config/icloud_sync/2fa_state.json` and waits for the code in `~/.icloud_sync_2fa_code`; the menu bar app polls the state file and shows the code dialog (manual fallback: `echo CODE > ~/.icloud_sync_2fa_code`)
+- pyicloud session/trust token lives in `~/.config/icloud_sync/session/` (`SESSION_DIR`), never the default `$TMPDIR` — macOS wipes that and 2FA would be asked at every start
 - Apple session expires ~2 months; `refresh_interval=300` keeps it alive between expirations
 - Do not poll more aggressively than 60s — iCloud rate-limits

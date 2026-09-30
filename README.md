@@ -96,7 +96,9 @@ Files never synced: `.DS_Store`, `*.tmp`, `*.part`, hidden files, `desktop.ini`,
 
 ## Two-factor authentication
 
-During initial setup a Terminal window opens running `icloud-sync setup`, which handles 2FA interactively. When the session expires (~2 months), re-run **Setup / Credentials…** from the menu bar.
+**Setup / Credentials…** verifies your Apple ID and asks for the 2FA code in a native dialog. The resulting session and trust token are stored in `~/.config/icloud_sync/session/`, so restarts and reboots don't ask again.
+
+If iCloud does ask again (the trust token expires after roughly two months), the daemon requests the code and the menu bar app pops up the same dialog — enter the code and syncing resumes. Without the app running you can answer by hand with `echo CODE > ~/.icloud_sync_2fa_code`.
 
 ## Project structure
 

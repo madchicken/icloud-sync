@@ -3,7 +3,13 @@ name = "virtualicloud"
 version = "0.4.2"
 requires-python = ">=3.11"
 dependencies = [
-    "pyicloud @ git+https://github.com/timlaing/pyicloud.git",
+    # 2.7.0 is the first release whose 2FA flow requests ONE code via Apple's
+    # trusted-device bridge (2.6.5 fired push + SMS at once and then validated
+    # against the wrong endpoint, so no code was ever accepted).
+    "pyicloud @ git+https://github.com/timlaing/pyicloud.git@2.7.0",
+    # pyicloud 2.7.0 imports `rich` at module level but only declares it in its
+    # `cli` extra; without this `import pyicloud` fails in the bundled app.
+    "rich>=13.0",
     "watchdog>=4.0",
     "keyring>=25.0",
     "send2trash>=1.8",

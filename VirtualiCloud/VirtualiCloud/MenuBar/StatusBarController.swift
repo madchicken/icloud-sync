@@ -37,6 +37,7 @@ final class StatusBarController {
         }
         activityPollTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.checkActivity()
+            TwoFactorDialog.checkPending()
         }
     }
 

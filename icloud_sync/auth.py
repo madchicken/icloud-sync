@@ -1,14 +1,17 @@
-import getpass
 import logging
 import subprocess
 import sys
-import time
-from pathlib import Path
 from typing import Optional
 
 import keyring
 from pyicloud import PyiCloudService
-from pyicloud.exceptions import PyiCloudFailedLoginException
+from pyicloud.exceptions import (
+    PyiCloudAPIResponseException,
+    PyiCloudFailedLoginException,
+)
+
+from . import twofa
+from .config import SESSION_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +72,7 @@ def authenticate(username: str, session_refresh_interval: int = 300) -> PyiCloud
         api = PyiCloudService(
             apple_id=username,
             password=password,
+            cookie_directory=str(SESSION_DIR),
             refresh_interval=session_refresh_interval,
         )
     except PyiCloudFailedLoginException as e:
@@ -91,25 +95,39 @@ def authenticate(username: str, session_refresh_interval: int = 300) -> PyiCloud
 
 
 # ---------------------------------------------------------------------------
-# Daemon-mode 2FA/2SA: wait for code written to a file
+# Daemon-mode 2FA/2SA: ask the menu bar app for the code (see twofa.py)
 # ---------------------------------------------------------------------------
+
+_MAX_CODE_ATTEMPTS = 3
+
 
 def _handle_2fa_daemon(api: PyiCloudService) -> None:
     notify("iCloud Sync", "Two-factor authentication required — check your device")
     logger.info("Two-factor authentication required")
 
     if api.security_key_names:
-        logger.error(
-            "Security key required (%s). Cannot handle in daemon mode.",
-            ", ".join(api.security_key_names),
-        )
+        msg = f"Security key required ({', '.join(api.security_key_names)}); not supported by the daemon."
+        logger.error(msg)
+        twofa.fail(msg)
         sys.exit(1)
 
-    code = _wait_for_code_file()
-    if not api.validate_2fa_code(code):
-        logger.error("2FA code validation failed")
-        sys.exit(1)
+    # pyicloud already requested a code while logging in. After a rejected code
+    # its challenge state is cleared, so each retry asks Apple for a fresh one.
+    def resend() -> None:
+        try:
+            api.request_2fa_code()
+        except PyiCloudAPIResponseException as e:
+            logger.warning("Could not request a new 2FA code: %s", e)
+
+    _collect_and_validate(api.validate_2fa_code, _2fa_prompt(api), resend)
     logger.info("2FA validated")
+
+
+def _2fa_prompt(api: PyiCloudService) -> str:
+    method = getattr(api, "two_factor_delivery_method", "unknown")
+    if method == "sms":
+        return "Enter the verification code Apple sent you by SMS."
+    return "Enter the verification code shown on your Apple devices."
 
 
 def _handle_2sa_daemon(api: PyiCloudService) -> None:
@@ -119,36 +137,54 @@ def _handle_2sa_daemon(api: PyiCloudService) -> None:
     devices = api.trusted_devices
     if not devices:
         logger.error("No trusted devices available for 2SA")
+        twofa.fail("No trusted devices available for two-step authentication.")
         sys.exit(1)
 
     device = devices[0]
+
+    def resend() -> None:
+        if not api.send_verification_code(device):
+            logger.warning("Apple refused to resend the verification code")
+
     if not api.send_verification_code(device):
         logger.error("Failed to send verification code")
+        twofa.fail("Apple refused to send a verification code to your trusted device.")
         sys.exit(1)
 
-    code = _wait_for_code_file()
-    if not api.validate_verification_code(device, code):
-        logger.error("2SA code validation failed")
-        sys.exit(1)
+    _collect_and_validate(
+        lambda code: api.validate_verification_code(device, code),
+        "Enter the verification code sent to your trusted device.",
+        resend,
+    )
     logger.info("2SA validated")
 
 
-def _wait_for_code_file() -> str:
-    """Wait for user to write a 2FA code to ~/.icloud_sync_2fa_code."""
-    code_path = Path.home() / ".icloud_sync_2fa_code"
-    code_path.unlink(missing_ok=True)
+def _collect_and_validate(validate, prompt: str, resend) -> None:
+    """
+    Ask the app for a code, up to _MAX_CODE_ATTEMPTS times; exit on give-up.
+    `resend` is called before every retry so the user gets a fresh code.
+    """
+    message = prompt
+    for attempt in range(1, _MAX_CODE_ATTEMPTS + 1):
+        if attempt > 1:
+            resend()
+        twofa.request_code(message)
+        notify("iCloud Sync", f"Enter your verification code (or: echo CODE > {twofa.CODE_FILE})")
+        code = twofa.wait_for_code()
+        if code is None:
+            sys.exit(1)  # wait_for_code already recorded the failure
+        try:
+            accepted = validate(code)
+        except PyiCloudAPIResponseException as e:
+            logger.warning("Verification request failed: %s", e)
+            accepted = False
+        if accepted:
+            return
+        logger.warning("Verification code rejected (attempt %d/%d)", attempt, _MAX_CODE_ATTEMPTS)
+        message = f"That code was not accepted (attempt {attempt}/{_MAX_CODE_ATTEMPTS}). A new one was requested. {prompt}"
 
-    notify("iCloud Sync", f"Enter your 2FA code: echo CODE > {code_path}")
-    logger.info("Waiting for 2FA code at %s", code_path)
-
-    for _ in range(150):  # 5 minutes
-        if code_path.exists():
-            code = code_path.read_text().strip()
-            code_path.unlink(missing_ok=True)
-            return code
-        time.sleep(2)
-
-    logger.error("Timed out waiting for 2FA code")
+    logger.error("2FA code validation failed")
+    twofa.fail("The verification code was rejected too many times. Start the daemon again to retry.")
     sys.exit(1)
 
 
@@ -161,7 +197,9 @@ def interactive_authenticate(username: str, password: str) -> PyiCloudService:
     Authenticate interactively (used during setup). Handles 2FA/2SA via stdin.
     """
     try:
-        api = PyiCloudService(apple_id=username, password=password)
+        api = PyiCloudService(
+            apple_id=username, password=password, cookie_directory=str(SESSION_DIR)
+        )
     except PyiCloudFailedLoginException as e:
         print(f"Login failed: {e}", file=sys.stderr)
         sys.exit(1)

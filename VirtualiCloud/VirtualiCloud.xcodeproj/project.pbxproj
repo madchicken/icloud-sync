@@ -10,6 +10,7 @@
 		04CB0823F510BBF6922997CC /* ShellRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C83739976105A1A6D45F700 /* ShellRunner.swift */; };
 		0ADF6E0AF20D2C10EC348C62 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8250366D9155AC6F746866 /* KeychainStore.swift */; };
 		20E20ECD5E61618DFCE43553 /* DaemonManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD4CD9723058F27E5DD8CAD3 /* DaemonManager.swift */; };
+		250C3956ACD5FC9390FC1324 /* TwoFactorDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F654491431ABE972E0F5102 /* TwoFactorDialog.swift */; };
 		3300A9133F327EF682F9D97B /* UninstallHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61197DD54701B7AE801AEAAA /* UninstallHelper.swift */; };
 		384DF7CA9A1EAFCDA088798E /* UNHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BDAB2CA400EADFFF319FC09 /* UNHelper.swift */; };
 		4409C11622D36C207974AE4C /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 02E95E4E04F32F249C0B54C6 /* Sparkle */; };
@@ -38,6 +39,7 @@
 		24C0503017A60B71FBE40C54 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
 		268C5941E721712A1624CDC4 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ServiceManagement.framework; sourceTree = "<group>"; };
 		3B1DEB29C7FCC8AF8ED823F8 /* LaunchAtLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLogin.swift; sourceTree = "<group>"; };
+		4F654491431ABE972E0F5102 /* TwoFactorDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoFactorDialog.swift; sourceTree = "<group>"; };
 		5CF01D4F0DEB8582683330A4 /* PairingsDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingsDialog.swift; sourceTree = "<group>"; };
 		5EEAEC833EBD8C4D70698887 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = UserNotifications.framework; sourceTree = "<group>"; };
 		61197DD54701B7AE801AEAAA /* UninstallHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallHelper.swift; sourceTree = "<group>"; };
@@ -113,6 +115,7 @@
 				5CF01D4F0DEB8582683330A4 /* PairingsDialog.swift */,
 				B9CAEB41296A8E44242CF993 /* SettingsDialog.swift */,
 				9D6BA459DAC86B810CBA2964 /* SetupHelper.swift */,
+				4F654491431ABE972E0F5102 /* TwoFactorDialog.swift */,
 				61197DD54701B7AE801AEAAA /* UninstallHelper.swift */,
 			);
 			path = UI;
@@ -278,6 +281,7 @@
 				BF704475558DA7C031A445FB /* SetupHelper.swift in Sources */,
 				04CB0823F510BBF6922997CC /* ShellRunner.swift in Sources */,
 				6AF108846F99B4CA1274F3B5 /* StatusBarController.swift in Sources */,
+				250C3956ACD5FC9390FC1324 /* TwoFactorDialog.swift in Sources */,
 				384DF7CA9A1EAFCDA088798E /* UNHelper.swift in Sources */,
 				3300A9133F327EF682F9D97B /* UninstallHelper.swift in Sources */,
 				9954CB5AAD006119D74C6A70 /* VirtualiCloudApp.swift in Sources */,
